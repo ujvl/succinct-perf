@@ -60,30 +60,39 @@ public class Benchmark {
                 String[] benchParams = benchType.split("\\.");
                 if(benchParams.length == 1) {
                     if (benchParams[0] == "all") {
+                        System.out.println("Benchmarking all classes and methods...");
                         new SuccinctBufferBench(dataPath, storageMode).benchAll(resPath);
                         new SuccinctFileBufferBench(dataPath, storageMode).benchAll(queryFile, resPath);
                         new SuccinctStreamBench(dataPath).benchAll(resPath);
                         new SuccinctFileStreamBench(dataPath).benchAll(queryFile, resPath);
                     } else if(benchParams[0] == "SuccinctBuffer") {
+                        System.out.println("Benchmarking all methods for SuccinctBuffer...");
                         new SuccinctBufferBench(dataPath, storageMode).benchAll(resPath);
                     } else if(benchParams[0] == "SuccinctFileBuffer") {
+                        System.out.println("Benchmarking all methods for SuccinctFileBuffer...");
                         new SuccinctFileBufferBench(dataPath, storageMode).benchAll(queryFile, resPath);
                     } else if(benchParams[0] == "SuccinctStream") {
+                        System.out.println("Benchmarking all methods for SuccinctStream...");
                         new SuccinctStreamBench(dataPath).benchAll(resPath);
                     } else if(benchParams[0] == "SuccinctFileStream") {
+                        System.out.println("Benchmarking all methods for SuccinctFileStream...");
                         new SuccinctFileStreamBench(dataPath).benchAll(queryFile, resPath);
                     } else {
                         System.out.println("Invalid benchmark specification.");
+                        System.out.println("Test class must be one of SuccinctBuffer, SuccinctFileBuffer, SuccinctStream or SuccinctFileStream");
                         formatter.printHelp("succinct-perf", options);
                         System.exit(0);
                     }
                 } else if(benchParams.length == 2) {
                     if (benchParams[0] == "SuccinctBuffer") {
                         if(benchParams[1] == "lookupNPA") {
+                            System.out.println("Benchmarking SuccinctBuffer.lookupNPA...");
                             new SuccinctBufferBench(dataPath, storageMode).benchLookupNPA(resPath);
                         } else if(benchParams[1] == "lookupSA") {
+                            System.out.println("Benchmarking SuccinctBuffer.lookupSA...");
                             new SuccinctBufferBench(dataPath, storageMode).benchLookupSA(resPath);
                         } else if(benchParams[2] == "lookupISA") {
+                            System.out.println("Benchmarking SuccinctBuffer.lookupISA...");
                             new SuccinctBufferBench(dataPath, storageMode).benchLookupISA(resPath);
                         } else {
                             System.out.println("Invalid benchmark specification.");
@@ -92,10 +101,13 @@ public class Benchmark {
                         }
                     } else if(benchParams[0] == "SuccinctFileBuffer") {
                         if(benchParams[1] == "count") {
+                            System.out.println("Benchmarking SuccinctFileBuffer.count...");
                             new SuccinctFileBufferBench(dataPath, storageMode).benchCount(queryFile, resPath);
                         } else if(benchParams[1] == "search") {
+                            System.out.println("Benchmarking SuccinctFileBuffer.search...");
                             new SuccinctFileBufferBench(dataPath, storageMode).benchSearch(queryFile, resPath);
                         } else if(benchParams[1] == "extract") {
+                            System.out.println("Benchmarking SuccinctFileBuffer.extract...");
                             new SuccinctFileBufferBench(dataPath, storageMode).benchExtract(resPath);
                         } else {
                             System.out.println("Invalid benchmark specification.");
@@ -104,31 +116,43 @@ public class Benchmark {
                         }
                     } else if(benchParams[0] == "SuccinctStream") {
                         if(benchParams[1] == "lookupNPA") {
+                            System.out.println("Benchmarking SuccinctStream.lookupNPA...");
                             new SuccinctStreamBench(dataPath).benchLookupNPA(resPath);
                         } else if(benchParams[1] == "lookupSA") {
+                            System.out.println("Benchmarking SuccinctStream.lookupSA...");
                             new SuccinctStreamBench(dataPath).benchLookupSA(resPath);
                         } else if(benchParams[2] == "lookupISA") {
+                            System.out.println("Benchmarking SuccinctStream.lookupISA...");
                             new SuccinctStreamBench(dataPath).benchLookupISA(resPath);
                         } else {
                             System.out.println("Invalid benchmark specification.");
                             formatter.printHelp("succinct-perf", options);
                             System.exit(0);
                         }
-                    } else if(benchParams[0] == "SuccinctFileBuffer") {
+                    } else if(benchParams[0] == "SuccinctFileStream") {
                         if(benchParams[1] == "count") {
+                            System.out.println("Benchmarking SuccinctFileStream.count...");
                             new SuccinctFileStreamBench(dataPath).benchCount(queryFile, resPath);
                         } else if(benchParams[1] == "search") {
+                            System.out.println("Benchmarking SuccinctFileStream.search...");
                             new SuccinctFileStreamBench(dataPath).benchSearch(queryFile, resPath);
                         } else if(benchParams[1] == "extract") {
+                            System.out.println("Benchmarking SuccinctFileStream.extract...");
                             new SuccinctFileStreamBench(dataPath).benchExtract(resPath);
                         } else {
                             System.out.println("Invalid benchmark specification.");
+                            System.out.println("Test method must be one of count, search or extract");
                             formatter.printHelp("succinct-perf", options);
                             System.exit(0);
                         }
+                    } else {
+                        System.out.println("Invalid benchmark specification.");
+                        System.out.println("Test class must be one of SuccinctBuffer, SuccinctFileBuffer, SuccinctStream or SuccinctFileStream");
+                        formatter.printHelp("succinct-perf", options);
+                        System.exit(0);
                     }
                 } else {
-                    System.out.println("Invalid benchmark specification.");
+                    System.out.println("Invalid benchmark specification; benchParams.length = " + benchParams.length);
                     formatter.printHelp("succinct-perf", options);
                     System.exit(0);
                 }
