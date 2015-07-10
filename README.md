@@ -2,6 +2,9 @@
 
 This is a performance testing framework for [Succinct](https://github.com/amplab/succinct).
 
+## Succinct Version
+This framework is applicable for Succinct 1.2+.
+
 ## Constructing the dataset
 
 Before running any benchmark, the dataset to be benchmarked against needs to be 

@@ -58,12 +58,12 @@
         <dependency>
             <groupId>amplab</groupId>
             <artifactId>succinct-core</artifactId>
-            <version>0.1.1</version>
+            <version>0.1.2</version>
         </dependency>
         <dependency>
             <groupId>amplab</groupId>
             <artifactId>succinct-spark</artifactId>
-            <version>0.1.1</version>
+            <version>0.1.2</version>
         </dependency>
     </dependencies>
 </project>
