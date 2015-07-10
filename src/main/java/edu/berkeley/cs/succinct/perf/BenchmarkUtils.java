@@ -10,7 +10,7 @@ public class BenchmarkUtils {
         long[] randoms = new long[numQueries];
         Random rand = new Random();
         for(int i = 0; i < numQueries; i++) {
-            randoms[i] = rand.nextLong() % limit;
+            randoms[i] = rand.nextInt(limit);
         }
         return randoms;
     }
