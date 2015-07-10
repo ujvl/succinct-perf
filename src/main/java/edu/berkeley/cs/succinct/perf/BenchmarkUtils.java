@@ -1,5 +1,8 @@
 package edu.berkeley.cs.succinct.perf;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -25,5 +28,15 @@ public class BenchmarkUtils {
         }
         bufferedReader.close();
         return queries;
+    }
+
+    public static Configuration getConf() {
+        Configuration conf = new Configuration();
+        String confDir = System.getenv("HADOOP_CONF_DIR");
+        if(confDir != null) {
+            conf.addResource(new Path(confDir + "/core-site.xml"));
+            conf.addResource(new Path(confDir + "/hdfs-site.xml"));
+        }
+        return conf;
     }
 }

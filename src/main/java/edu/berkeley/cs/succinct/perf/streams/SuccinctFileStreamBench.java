@@ -13,7 +13,7 @@ public class SuccinctFileStreamBench {
     private SuccinctFileStream buffer;
 
     public SuccinctFileStreamBench(String serializedDataPath) throws IOException {
-        buffer = new SuccinctFileStream(new Path(serializedDataPath));
+        buffer = new SuccinctFileStream(new Path(serializedDataPath), BenchmarkUtils.getConf());
     }
 
     public void benchCount(String queryFile, String resPath) throws IOException {

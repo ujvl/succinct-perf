@@ -13,7 +13,7 @@ public class SuccinctStreamBench {
     private SuccinctStream buffer;
 
     public SuccinctStreamBench(String serializedDataPath) throws IOException {
-        buffer = new SuccinctStream(new Path(serializedDataPath));
+        buffer = new SuccinctStream(new Path(serializedDataPath), BenchmarkUtils.getConf());
     }
 
     public void benchLookupNPA(String resPath) throws IOException {
