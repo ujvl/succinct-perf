@@ -66,10 +66,10 @@ public class Benchmark {
                 if(benchParams.length == 1) {
                     if (benchParams[0].equals("all")) {
                         System.out.println("Benchmarking all classes and methods...");
-                        new SuccinctBufferBench(dataPath, storageMode).benchAll(resPath);
-                        new SuccinctFileBufferBench(dataPath, storageMode).benchAll(queryFile, resPath);
-                        new SuccinctStreamBench(dataPath).benchAll(resPath);
-                        new SuccinctFileStreamBench(dataPath).benchAll(queryFile, resPath);
+                        new SuccinctBufferBench(dataPath, storageMode).benchAll(resPath + "_sb");
+                        new SuccinctFileBufferBench(dataPath, storageMode).benchAll(queryFile, resPath + "_sfb");
+                        new SuccinctStreamBench(dataPath).benchAll(resPath + "_ss");
+                        new SuccinctFileStreamBench(dataPath).benchAll(queryFile, resPath + "_sfs");
                     } else if(benchParams[0].equals("SuccinctBuffer")) {
                         System.out.println("Benchmarking all methods for SuccinctBuffer...");
                         new SuccinctBufferBench(dataPath, storageMode).benchAll(resPath);

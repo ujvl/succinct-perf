@@ -54,7 +54,7 @@ public class SuccinctStreamBench {
         }
 
         double avgTime = totalTime / MAX_QUERIES;
-        System.out.println("Average time per NPA lookup: " + avgTime);
+        System.out.println("Average time per SA lookup: " + avgTime);
         bufferedWriter.close();
     }
 
@@ -75,7 +75,7 @@ public class SuccinctStreamBench {
         }
 
         double avgTime = totalTime / MAX_QUERIES;
-        System.out.println("Average time per NPA lookup: " + avgTime);
+        System.out.println("Average time per ISA lookup: " + avgTime);
         bufferedWriter.close();
     }
 

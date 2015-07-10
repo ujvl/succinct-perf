@@ -65,5 +65,10 @@
             <artifactId>succinct-spark</artifactId>
             <version>0.1.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <version>2.2.0</version>
+        </dependency>
     </dependencies>
 </project>
