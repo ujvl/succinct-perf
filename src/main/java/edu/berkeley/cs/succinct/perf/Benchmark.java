@@ -58,10 +58,11 @@ public class Benchmark {
 
             if(benchType != null) {
                 String[] benchParams = benchType.split("\\.");
-                System.out.println("Benchmark: ");
+                System.out.println("Benchmark Parameters (" + benchParams.length +  "): ");
                 for(String param : benchParams) {
                     System.out.print(" \"" + param + "\" ");
                 }
+                System.out.println();
                 if(benchParams.length == 1) {
                     if (benchParams[0] == "all") {
                         System.out.println("Benchmarking all classes and methods...");
