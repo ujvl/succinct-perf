@@ -84,7 +84,7 @@ public class Benchmark {
                         new SuccinctFileStreamBench(dataPath).benchAll(queryFile, resPath);
                     } else {
                         System.out.println("Invalid benchmark specification.");
-                        System.out.println("Test class must be one of SuccinctBuffer, SuccinctFileBuffer, SuccinctStream or SuccinctFileStream");
+                        System.out.println("Test class must be one of SuccinctBuffer, SuccinctFileBuffer, SuccinctStream, SuccinctFileStream or all");
                         formatter.printHelp("succinct-perf", options);
                         System.exit(0);
                     }
