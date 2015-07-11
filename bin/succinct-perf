@@ -19,7 +19,7 @@ for f in "${JAR_PATH}"/succinct-perf-*-jar-with-dependencies.jar; do
     echo "You need to build Succinct-Core before running this program" 1>&2
     exit 1
   fi
-  SUCCINCT_CORE_JAR="$f"
+  SUCCINCT_PERF_JAR="$f"
   JAR_COUNT=$((JAR_COUNT+1))
 done
 
@@ -30,4 +30,5 @@ if [ "$JAR_COUNT" -gt "1" ]; then
   exit 1
 fi
 
-java -cp $SUCCINCT_CORE_JAR edu.berkeley.cs.succinct.perf.Benchmark $@
+export CLASSPATH=$SUCCINCT_PERF_JAR:$CLASSPATH
+java -cp $CLASSPATH edu.berkeley.cs.succinct.perf.Benchmark $@
