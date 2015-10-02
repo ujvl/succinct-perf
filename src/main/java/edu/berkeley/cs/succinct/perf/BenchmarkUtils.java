@@ -22,7 +22,11 @@ public class BenchmarkUtils {
         BufferedReader bufferedReader = new BufferedReader(new FileReader(queryFile));
         String[] queries = new String[numQueries];
         int i = 0;
-        while((queries[i] = bufferedReader.readLine()) != null) i++;
+        String query;
+        while((query = bufferedReader.readLine()) != null && i < numQueries) {
+            queries[i] = query;
+            i++;
+        }
         if(i < numQueries) {
             System.err.println("[WARNING] Number of queries is less then " + numQueries);
         }
