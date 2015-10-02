@@ -6,6 +6,7 @@ import org.apache.hadoop.fs.Path;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class BenchmarkUtils {
@@ -20,18 +21,18 @@ public class BenchmarkUtils {
 
     public static String[] readQueryFile(String queryFile, int numQueries) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new FileReader(queryFile));
-        String[] queries = new String[numQueries];
+        ArrayList<String> queries = new ArrayList<String>();
         int i = 0;
         String query;
         while((query = bufferedReader.readLine()) != null && i < numQueries) {
-            queries[i] = query;
+            queries.add(query);
             i++;
         }
         if(i < numQueries) {
             System.err.println("[WARNING] Number of queries is less then " + numQueries);
         }
         bufferedReader.close();
-        return queries;
+        return queries.toArray(new String[queries.size()]);
     }
 
     public static Configuration getConf() {
