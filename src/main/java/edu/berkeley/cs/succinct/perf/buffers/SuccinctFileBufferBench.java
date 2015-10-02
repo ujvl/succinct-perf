@@ -7,7 +7,8 @@ import edu.berkeley.cs.succinct.perf.BenchmarkUtils;
 import java.io.*;
 
 public class SuccinctFileBufferBench {
-    private static final int MAX_QUERIES = 1000;
+    private static final int WARMUP_QUERIES = 10000;
+    private static final int MAX_QUERIES = 100000;
     private SuccinctFileBuffer buffer;
 
     public SuccinctFileBufferBench(String serializedDataPath, StorageMode storageMode) {
@@ -22,15 +23,25 @@ public class SuccinctFileBufferBench {
         double totalTime = 0.0;
         BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(resPath));
 
+        long sum = 0, qCount = 0;
         for(String query: queries) {
+            sum += buffer.count(query.getBytes());
+            qCount++;
+            if(qCount >= WARMUP_QUERIES) break;
+        }
+
+        System.out.println("Warmup complete: Checksum = " + sum);
+
+        for(String query: queries) {
+            byte[] queryBytes = query.getBytes();
             long start = System.nanoTime();
-            long count = buffer.count(query.getBytes());
+            long count = buffer.count(queryBytes);
             long end = System.nanoTime();
             bufferedWriter.write(count + "\t" + (end - start) + "\n");
             totalTime += (end - start);
         }
 
-        double avgTime = totalTime / MAX_QUERIES;
+        double avgTime = totalTime / queries.length;
         System.out.println("Average time per count query: " + avgTime);
         bufferedWriter.close();
     }
@@ -43,15 +54,25 @@ public class SuccinctFileBufferBench {
         double totalTime = 0.0;
         BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(resPath));
 
+        long sum = 0, qCount = 0;
         for(String query: queries) {
+            sum += buffer.search(query.getBytes()).length;
+            qCount++;
+            if(qCount >= WARMUP_QUERIES) break;
+        }
+
+        System.out.println("Warmup complete: Checksum = " + sum);
+
+        for(String query: queries) {
+            byte[] queryBytes = query.getBytes();
             long start = System.nanoTime();
-            Long[] results = buffer.search(query.getBytes());
+            Long[] results = buffer.search(queryBytes);
             long end = System.nanoTime();
             bufferedWriter.write(results.length + "\t" + (end - start) + "\n");
             totalTime += (end - start);
         }
 
-        double avgTime = totalTime / MAX_QUERIES;
+        double avgTime = totalTime / queries.length;
         System.out.println("Average time per search query: " + avgTime);
         bufferedWriter.close();
     }
@@ -65,6 +86,15 @@ public class SuccinctFileBufferBench {
         double totalTime = 0.0;
         BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(resPath));
 
+        long sum = 0, qCount = 0;
+        for(long offset: randoms) {
+            sum += buffer.extract((int)offset, extractLength).length;
+            qCount++;
+            if(qCount >= WARMUP_QUERIES) break;
+        }
+
+        System.out.println("Warmup complete: Checksum = " + sum);
+
         for(long offset: randoms) {
             long start = System.nanoTime();
             byte[] result = buffer.extract((int) offset, extractLength);
@@ -73,7 +103,7 @@ public class SuccinctFileBufferBench {
             totalTime += (end - start);
         }
 
-        double avgTime = totalTime / MAX_QUERIES;
+        double avgTime = totalTime / randoms.length;
         System.out.println("Average time per extract query: " + avgTime);
         bufferedWriter.close();
     }
