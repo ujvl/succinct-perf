@@ -19,6 +19,9 @@ target/
 # vim tmps
 .*sw*
 
+# results
+results
+
 # sbt
 project/project
 project/target
