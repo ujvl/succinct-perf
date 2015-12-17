@@ -83,13 +83,13 @@ object SysBenchBatch {
   }
 
   def main(args: Array[String]) {
-    if (args.length < 3) {
+    if (args.length < 2) {
       System.err.println("Usage: SysBench <succinct-data> <output-path>")
       System.exit(1)
     }
 
     val succinctDataPath = args(0)
-    outPath = args(2)
+    outPath = args(1)
 
     val sparkConf = new SparkConf().setAppName("SysBench")
     val ctx = new SparkContext(sparkConf)
