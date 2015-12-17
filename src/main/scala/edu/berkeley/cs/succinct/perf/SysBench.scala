@@ -11,8 +11,8 @@ import scala.util.Random
 
 object SysBench {
   // Constants
-  val WARMUP_COUNT: Int = 20
-  val MEASURE_COUNT: Int = 100
+  val WARMUP_COUNT: Int = 200
+  val MEASURE_COUNT: Int = 2000
 
   val WARMUP_TIME: Int = 30000
   val MEASURE_TIME: Int = 120000
