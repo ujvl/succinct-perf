@@ -10,12 +10,17 @@ import scala.util.Random
 
 object SysBenchBatch {
   // Constants
+  val WARMUP_COUNT: Int = 200
+  val MEASURE_COUNT: Int = 2000
+
   val WARMUP_TIME: Int = 30000
   val MEASURE_TIME: Int = 120000
   val COOLDOWN_TIME: Int = 30000
 
   // Queries
   var keys: Array[Long] = _
+  var keysWarmup: Array[Long] = _
+  var keysMeasure: Array[Long] = _
 
   // Output path
   var outPath: String = _
@@ -28,6 +33,29 @@ object SysBenchBatch {
 
   def sampleArr[T: ClassTag](input: Array[T], sampleSize: Int): Array[T] = {
     Array.fill(sampleSize)(input(Random.nextInt(input.length)))
+  }
+
+  def benchSuccinctRDDLatency(rdd: SuccinctKVRDD[Long]): Unit = {
+    batchSizes.foreach(b => {
+      println(s"Benchmarking Succinct RDD get for batch size = $b...")
+      val batchesWarmup = (0 to (WARMUP_COUNT/b) - 1).map(i => keysWarmup.slice(i, i + b))
+      val batchesMeasure = (0 to (MEASURE_COUNT/b) - 1).map(i => keysMeasure.slice(i, i + b))
+      batchesWarmup.foreach(k => {
+        val size = rdd.multiget(k).size
+        println(s"$k\t$size")
+      })
+
+      // Measure
+      val outGet = new FileWriter(outPath + "/get-latency-$b")
+      batchesMeasure.foreach(k => {
+        val startTime = System.currentTimeMillis()
+        val size = rdd.multiget(k).size
+        val endTime = System.currentTimeMillis()
+        val totTime = endTime - startTime
+        outGet.write(s"$k\t$size\t$totTime\n")
+      })
+      outGet.close()
+    })
   }
 
   def benchSuccinctRDDThroughput(rdd: SuccinctKVRDD[Long]): Unit = {
@@ -61,7 +89,7 @@ object SysBenchBatch {
               }
               val time = (System.currentTimeMillis() - startTime).toDouble / 1000.0
               val throughput = numQueries.toDouble / time.toDouble
-              val out = new FileWriter(outPath + s"/get-throughput--$b-$t", true)
+              val out = new FileWriter(outPath + s"/get-throughput-$b-$t", true)
               out.write(s"$tid\t$throughput\n")
               out.close()
 
@@ -83,13 +111,14 @@ object SysBenchBatch {
   }
 
   def main(args: Array[String]) {
-    if (args.length < 2) {
-      System.err.println("Usage: SysBench <succinct-data> <output-path>")
+    if (args.length != 3) {
+      System.err.println("Usage: SysBench <succinct-data> <output-path> <bench-type>")
       System.exit(1)
     }
 
     val succinctDataPath = args(0)
     outPath = args(1)
+    val benchType = args(2)
 
     val sparkConf = new SparkConf().setAppName("SysBench")
     val ctx = new SparkContext(sparkConf)
@@ -98,6 +127,14 @@ object SysBenchBatch {
     val count = kvRDDSuccinct.count()
 
     keys = Random.shuffle((0 to 9999).map(i => Math.abs(Random.nextLong()) % count)).toArray
-    benchSuccinctRDDThroughput(kvRDDSuccinct)
+    keysWarmup = sampleArr(keys, WARMUP_COUNT)
+    keysMeasure = sampleArr(keys, MEASURE_COUNT)
+
+    if (benchType == "throughput")
+      benchSuccinctRDDThroughput(kvRDDSuccinct)
+    else if (benchType == "latency")
+      benchSuccinctRDDLatency(kvRDDSuccinct)
+    else
+      println(s"[ERROR] Invalid benchType: $benchType")
   }
 }
