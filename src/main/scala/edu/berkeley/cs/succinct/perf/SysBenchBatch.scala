@@ -38,15 +38,15 @@ object SysBenchBatch {
   def benchSuccinctRDDLatency(rdd: SuccinctKVRDD[Long]): Unit = {
     batchSizes.foreach(b => {
       println(s"Benchmarking Succinct RDD get for batch size = $b...")
-      val batchesWarmup = (0 to (WARMUP_COUNT/b) - 1).map(i => keysWarmup.slice(i, i + b))
-      val batchesMeasure = (0 to (MEASURE_COUNT/b) - 1).map(i => keysMeasure.slice(i, i + b))
+      val batchesWarmup = (0 to WARMUP_COUNT - 1).map(i => keys.slice(i * b, i * b + b))
+      val batchesMeasure = (0 to MEASURE_COUNT - 1).map(i => keys.slice(i * b, i * b + b))
       batchesWarmup.foreach(k => {
         val size = rdd.multiget(k).size
         println(s"$k\t$size")
       })
 
       // Measure
-      val outGet = new FileWriter(outPath + "/get-latency-$b")
+      val outGet = new FileWriter(outPath + s"/get-latency-$b")
       batchesMeasure.foreach(k => {
         val startTime = System.currentTimeMillis()
         val size = rdd.multiget(k).size
@@ -127,8 +127,6 @@ object SysBenchBatch {
     val count = kvRDDSuccinct.count()
 
     keys = Random.shuffle((0 to 9999).map(i => Math.abs(Random.nextLong()) % count)).toArray
-    keysWarmup = sampleArr(keys, WARMUP_COUNT)
-    keysMeasure = sampleArr(keys, MEASURE_COUNT)
 
     if (benchType == "throughput")
       benchSuccinctRDDThroughput(kvRDDSuccinct)
