@@ -19,8 +19,6 @@ object SysBenchBatch {
 
   // Queries
   var keys: Array[Long] = _
-  var keysWarmup: Array[Long] = _
-  var keysMeasure: Array[Long] = _
 
   // Output path
   var outPath: String = _
@@ -126,7 +124,8 @@ object SysBenchBatch {
     val kvRDDSuccinct = ctx.succinctKV[Long](succinctDataPath)
     val count = kvRDDSuccinct.count()
 
-    keys = Random.shuffle((0 to 9999).map(i => Math.abs(Random.nextLong()) % count)).toArray
+    keys = Random.shuffle((0 to (batchSizes.max * MEASURE_COUNT) - 1)
+      .map(i => Math.abs(Random.nextLong()) % count)).toArray
 
     if (benchType == "throughput")
       benchSuccinctRDDThroughput(kvRDDSuccinct)
