@@ -11,8 +11,19 @@ public class SuccinctFileBufferBench {
     private static final int MAX_QUERIES = 100000;
     private SuccinctFileBuffer buffer;
 
+    /**
+     * Need default constructor to make class extendable
+     */
+    public SuccinctFileBufferBench() {
+        buffer = new SuccinctFileBuffer();
+    }
+
     public SuccinctFileBufferBench(String serializedDataPath, StorageMode storageMode) {
         buffer = new SuccinctFileBuffer(serializedDataPath, storageMode);
+    }
+
+    public void setSuccinctFileBuffer(SuccinctFileBuffer buf) {
+        this.buffer = buf;
     }
 
     public void benchCount(String queryFile, String resPath) throws IOException {
@@ -88,7 +99,7 @@ public class SuccinctFileBufferBench {
 
         long sum = 0, qCount = 0;
         for(long offset: randoms) {
-            sum += buffer.extract((int)offset, extractLength).length;
+            sum += buffer.extract((int) offset, extractLength).length;
             qCount++;
             if(qCount >= WARMUP_QUERIES) break;
         }
@@ -112,6 +123,5 @@ public class SuccinctFileBufferBench {
         benchCount(queryFile, resPath + "_count");
         benchSearch(queryFile, resPath + "_search");
         benchExtract(resPath + "_extract");
-
     }
 }

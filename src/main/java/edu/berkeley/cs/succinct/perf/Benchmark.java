@@ -3,6 +3,7 @@ package edu.berkeley.cs.succinct.perf;
 import edu.berkeley.cs.succinct.StorageMode;
 import edu.berkeley.cs.succinct.perf.buffers.SuccinctBufferBench;
 import edu.berkeley.cs.succinct.perf.buffers.SuccinctFileBufferBench;
+import edu.berkeley.cs.succinct.perf.buffers.TfsSrcSuccFileBufBench;
 import edu.berkeley.cs.succinct.perf.streams.SuccinctFileStreamBench;
 import edu.berkeley.cs.succinct.perf.streams.SuccinctStreamBench;
 import org.apache.commons.cli.*;
@@ -26,6 +27,7 @@ public class Benchmark {
         options.addOption("s", true, "Storage mode for SuccinctBuffer benchmarks."
                 + " Can be MEMORY_ONLY or MEMORY_MAPPED.");
         options.addOption("d", true, "Path to serialized Succinct data. (REQUIRED)");
+        options.addOption("t", true, "Tachyon master path (if file on TFS)");
 
         HelpFormatter formatter = new HelpFormatter();
 
@@ -38,6 +40,7 @@ public class Benchmark {
             String storageModeString = line.getOptionValue("s");
             String benchType = line.getOptionValue("b");
             String dataPath = line.getOptionValue("d");
+            String tfsPath = line.getOptionValue("t");
 
             StorageMode storageMode;
             if(storageModeString == null || storageModeString.equals("MEMORY_ONLY")) {
@@ -84,6 +87,9 @@ public class Benchmark {
                 } else if(benchParams[0].equals("SuccinctFileBuffer")) {
                     System.out.println("Benchmarking all methods for SuccinctFileBuffer...");
                     new SuccinctFileBufferBench(dataPath, storageMode).benchAll(queryFile, resPath);
+                } else if(benchParams[0].equals("TfsSrcSuccFileBufBench")) {
+                    System.out.println("Benchmarking all methods for TfsSrcSuccFileBufBench...");
+                    new TfsSrcSuccFileBufBench(tfsPath, dataPath).benchAll(queryFile, resPath);
                 } else if(benchParams[0].equals("SuccinctStream")) {
                     System.out.println("Benchmarking all methods for SuccinctStream...");
                     new SuccinctStreamBench(dataPath).benchAll(resPath);
@@ -92,7 +98,7 @@ public class Benchmark {
                     new SuccinctFileStreamBench(dataPath).benchAll(queryFile, resPath);
                 } else {
                     System.out.println("Invalid benchmark specification.");
-                    System.out.println("Test class must be one of SuccinctBuffer, SuccinctFileBuffer, SuccinctStream, SuccinctFileStream or all");
+                    System.out.println("Test class must be one of SuccinctBuffer, SuccinctFileBuffer, TfsSrcSuccFileBufBench, SuccinctStream, SuccinctFileStream or all");
                     formatter.printHelp("succinct-perf", options);
                     System.exit(0);
                 }
@@ -122,6 +128,21 @@ public class Benchmark {
                     } else if(benchParams[1].equals("extract")) {
                         System.out.println("Benchmarking SuccinctFileBuffer.extract...");
                         new SuccinctFileBufferBench(dataPath, storageMode).benchExtract(resPath);
+                    } else {
+                        System.out.println("Invalid benchmark specification.");
+                        formatter.printHelp("succinct-perf", options);
+                        System.exit(0);
+                    }
+                } else if(benchParams[0].equals("TfsSrcSuccFileBufBench")) {
+                    if(benchParams[1].equals("count")) {
+                        System.out.println("Benchmarking TfsSrcSuccFileBufBench.count...");
+                        new TfsSrcSuccFileBufBench(tfsPath, dataPath).benchCount(queryFile, resPath);
+                    } else if(benchParams[1].equals("search")) {
+                        System.out.println("Benchmarking TfsSrcSuccFileBufBench.search...");
+                        new TfsSrcSuccFileBufBench(tfsPath, dataPath).benchSearch(queryFile, resPath);
+                    } else if(benchParams[2].equals("extract")) {
+                        System.out.println("Benchmarking TfsSrcSuccFileBufBench.extract...");
+                        new TfsSrcSuccFileBufBench(tfsPath, dataPath).benchExtract(resPath);
                     } else {
                         System.out.println("Invalid benchmark specification.");
                         formatter.printHelp("succinct-perf", options);
