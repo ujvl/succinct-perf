@@ -5,29 +5,39 @@ import edu.berkeley.cs.succinct.buffers.SuccinctFileBuffer;
 import edu.berkeley.cs.succinct.perf.BenchmarkUtils;
 
 import java.io.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 public class SuccinctFileBufferBench {
     private static final int WARMUP_QUERIES = 10000;
     private static final int MAX_QUERIES = 100000;
+    private final int EXTRACT_LENGTH;
+    private final int NUM_THREADS;
     private SuccinctFileBuffer buffer;
 
-    /**
-     * Need default constructor to make class extendable
-     */
     public SuccinctFileBufferBench() {
         buffer = new SuccinctFileBuffer();
+        NUM_THREADS = 1;
+        EXTRACT_LENGTH = 1000;
     }
 
     public SuccinctFileBufferBench(String serializedDataPath, StorageMode storageMode) {
+        this();
         buffer = new SuccinctFileBuffer(serializedDataPath, storageMode);
+    }
+
+    public SuccinctFileBufferBench(String serializedDataPath, StorageMode storageMode, int threads, int extrLen) {
+        buffer = new SuccinctFileBuffer(serializedDataPath, storageMode);
+        NUM_THREADS = threads;
+        EXTRACT_LENGTH = extrLen;
     }
 
     public void setSuccinctFileBuffer(SuccinctFileBuffer buf) {
         this.buffer = buf;
     }
 
-    public void benchCount(String queryFile, String resPath) throws IOException {
-        System.out.println("Benchmarking count...");
+    public void benchCountLatency(String queryFile, String resPath) throws IOException {
+        System.out.println("Benchmarking count latency...");
 
         String[] queries = BenchmarkUtils.readQueryFile(queryFile, MAX_QUERIES);
 
@@ -57,8 +67,8 @@ public class SuccinctFileBufferBench {
         bufferedWriter.close();
     }
 
-    public void benchSearch(String queryFile, String resPath) throws IOException {
-        System.out.println("Benchmarking search...");
+    public void benchSearchLatency(String queryFile, String resPath) throws IOException {
+        System.out.println("Benchmarking search latency...");
 
         String[] queries = BenchmarkUtils.readQueryFile(queryFile, MAX_QUERIES);
 
@@ -88,18 +98,17 @@ public class SuccinctFileBufferBench {
         bufferedWriter.close();
     }
 
-    public void benchExtract(String resPath) throws IOException {
-        System.out.println("Benchmarking extract...");
+    public void benchExtractLatency(String resPath) throws IOException {
+        System.out.println("Benchmarking extract latency...");
 
-        int extractLength = 1000;
-        long[] randoms = BenchmarkUtils.generateRandoms(MAX_QUERIES, buffer.getOriginalSize() - extractLength);
+        long[] randoms = BenchmarkUtils.generateRandoms(MAX_QUERIES, buffer.getOriginalSize() - EXTRACT_LENGTH);
 
         double totalTime = 0.0;
         BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(resPath));
 
         long sum = 0, qCount = 0;
         for(long offset: randoms) {
-            sum += buffer.extract((int) offset, extractLength).length;
+            sum += buffer.extract((int) offset, EXTRACT_LENGTH).length;
             qCount++;
             if(qCount >= WARMUP_QUERIES) break;
         }
@@ -108,7 +117,7 @@ public class SuccinctFileBufferBench {
 
         for(long offset: randoms) {
             long start = System.nanoTime();
-            byte[] result = buffer.extract((int) offset, extractLength);
+            byte[] result = buffer.extract((int) offset, EXTRACT_LENGTH);
             long end = System.nanoTime();
             bufferedWriter.write(result.length + "\t" + (end - start) + "\n");
             totalTime += (end - start);
@@ -119,9 +128,67 @@ public class SuccinctFileBufferBench {
         bufferedWriter.close();
     }
 
-    public void benchAll(String queryFile, String resPath) throws IOException {
-        benchCount(queryFile, resPath + "_count");
-        benchSearch(queryFile, resPath + "_search");
-        benchExtract(resPath + "_extract");
+    public void benchSearchThroughput(String resPath) throws IOException {
+        System.out.println("Benchmarking search throughput with " + NUM_THREADS + " threads...");
+
+        for (int i = 0; i < NUM_THREADS; i++) {
+
+        }
+
     }
+
+    public void benchExtractThroughput(String resPath) throws IOException {
+        System.out.println("Benchmarking extract throughput with " + NUM_THREADS + " threads...");
+        for (int i = 0; i < NUM_THREADS; i++) {
+
+        }
+
+    }
+
+    public void benchAll(String queryFile, String resPath) throws IOException {
+        benchCountLatency(queryFile, resPath + "_count");
+        benchSearchLatency(queryFile, resPath + "_search");
+        benchExtractLatency(resPath + "_extract");
+    }
+
+    private class SearchBenchTask implements Callable<Integer> {
+
+        private int queriesExecuted;
+        private String[] queries;
+
+        public SearchBenchTask(String[] queries, int offset) {
+            queriesExecuted = 0;
+            this.queries = queries;
+        }
+
+        @Override
+        public Integer call() {
+            for (String query: queries) {
+                buffer.search(query.getBytes());
+                queriesExecuted++;
+            }
+            return queriesExecuted;
+        }
+    }
+
+    private class ExtractBenchTask implements Callable<Integer> {
+
+        private int queriesExecuted;
+        private long[] randoms;
+
+        public ExtractBenchTask(long[] randoms, int offset) {
+            queriesExecuted = 0;
+            this.randoms = randoms;
+        }
+
+        @Override
+        public Integer call() {
+            for (long offset: randoms) {
+                buffer.extract(offset, EXTRACT_LENGTH);
+                queriesExecuted++;
+            }
+            return queriesExecuted;
+        }
+    }
+
 }

@@ -121,13 +121,13 @@ public class Benchmark {
                 } else if(benchParams[0].equals("SuccinctFileBuffer")) {
                     if(benchParams[1].equals("count")) {
                         System.out.println("Benchmarking SuccinctFileBuffer.count...");
-                        new SuccinctFileBufferBench(dataPath, storageMode).benchCount(queryFile, resPath);
+                        new SuccinctFileBufferBench(dataPath, storageMode).benchCountLatency(queryFile, resPath);
                     } else if(benchParams[1].equals("search")) {
                         System.out.println("Benchmarking SuccinctFileBuffer.search...");
-                        new SuccinctFileBufferBench(dataPath, storageMode).benchSearch(queryFile, resPath);
+                        new SuccinctFileBufferBench(dataPath, storageMode).benchSearchLatency(queryFile, resPath);
                     } else if(benchParams[1].equals("extract")) {
                         System.out.println("Benchmarking SuccinctFileBuffer.extract...");
-                        new SuccinctFileBufferBench(dataPath, storageMode).benchExtract(resPath);
+                        new SuccinctFileBufferBench(dataPath, storageMode).benchExtractLatency(resPath);
                     } else {
                         System.out.println("Invalid benchmark specification.");
                         formatter.printHelp("succinct-perf", options);
@@ -136,13 +136,13 @@ public class Benchmark {
                 } else if(benchParams[0].equals("TfsSrcSuccFileBufBench")) {
                     if(benchParams[1].equals("count")) {
                         System.out.println("Benchmarking TfsSrcSuccFileBufBench.count...");
-                        new TfsSrcSuccFileBufBench(tfsPath, dataPath).benchCount(queryFile, resPath);
+                        new TfsSrcSuccFileBufBench(tfsPath, dataPath).benchCountLatency(queryFile, resPath);
                     } else if(benchParams[1].equals("search")) {
                         System.out.println("Benchmarking TfsSrcSuccFileBufBench.search...");
-                        new TfsSrcSuccFileBufBench(tfsPath, dataPath).benchSearch(queryFile, resPath);
+                        new TfsSrcSuccFileBufBench(tfsPath, dataPath).benchSearchLatency(queryFile, resPath);
                     } else if(benchParams[2].equals("extract")) {
                         System.out.println("Benchmarking TfsSrcSuccFileBufBench.extract...");
-                        new TfsSrcSuccFileBufBench(tfsPath, dataPath).benchExtract(resPath);
+                        new TfsSrcSuccFileBufBench(tfsPath, dataPath).benchExtractLatency(resPath);
                     } else {
                         System.out.println("Invalid benchmark specification.");
                         formatter.printHelp("succinct-perf", options);

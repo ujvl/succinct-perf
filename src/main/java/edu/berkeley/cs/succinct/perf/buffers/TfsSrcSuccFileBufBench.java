@@ -42,6 +42,11 @@ public class TfsSrcSuccFileBufBench extends SuccinctFileBufferBench {
         }
     }
 
+    public void benchAll(String queryFile, String resPath) throws IOException {
+        benchSearchLatency(queryFile, resPath + "_search");
+        benchExtractLatency(resPath + "_extract");
+    }
+
     /**
      * Reads ByteBuffer in from file existing in tfs
      * @param tfs tachyon file system
@@ -61,7 +66,6 @@ public class TfsSrcSuccFileBufBench extends SuccinctFileBufferBench {
         return buf;
     }
 
-
     /**
      * Sets up the tfs configuration
      * @param masterURI master URI of tfs instance
@@ -70,7 +74,7 @@ public class TfsSrcSuccFileBufBench extends SuccinctFileBufferBench {
         TachyonURI masterLoc = new TachyonURI(masterURI);
         TachyonConf tachyonConf = ClientContext.getConf();
         tachyonConf.set(Constants.MASTER_HOSTNAME, masterLoc.getHost());
-        tachyonConf.set(Constants.MASTER_PORT, Integer.toString(masterLoc.getPort()));
+        tachyonConf.set(Constants.MASTER_RPC_PORT, Integer.toString(masterLoc.getPort()));
         ClientContext.reset(tachyonConf);
     }
 
