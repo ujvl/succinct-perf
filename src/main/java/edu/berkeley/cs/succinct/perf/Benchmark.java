@@ -28,7 +28,9 @@ public class Benchmark {
         options.addOption("s", true, "Storage mode for SuccinctBuffer benchmarks."
                 + " Can be MEMORY_ONLY or MEMORY_MAPPED.");
         options.addOption("d", true, "Path to serialized Succinct data. (REQUIRED)");
-        options.addOption("t", true, "Tachyon master path (if file on TFS)");
+        options.addOption("t", true, "Tachyon master path (REQUIRED if file on TFS)");
+        options.addOption("n", true, "Number of threads for throughput bench (on SuccinctFileBuffer[-TFS])");
+        options.addOption("e", true, "Length of extract queries");
 
         HelpFormatter formatter = new HelpFormatter();
 
@@ -36,12 +38,21 @@ public class Benchmark {
             // Parse the command line options
             CommandLine line = parser.parse(options, args);
 
+            String benchType = line.getOptionValue("b");
             String resPath = line.getOptionValue("r");
             String queryFile = line.getOptionValue("q");
             String storageModeString = line.getOptionValue("s");
-            String benchType = line.getOptionValue("b");
             String dataPath = line.getOptionValue("d");
             String tfsPath = line.getOptionValue("t");
+            int threads = 1, extrLen = 1000;
+
+            if (line.getOptionValue("n") != null) {
+                threads = Integer.parseInt(line.getOptionValue("n"));
+            }
+
+            if (line.getOptionValue("e") != null) {
+                extrLen = Integer.parseInt(line.getOptionValue("e"));
+            }
 
             StorageMode storageMode;
             if(storageModeString == null || storageModeString.equals("MEMORY_ONLY")) {
@@ -90,7 +101,7 @@ public class Benchmark {
                     new SuccinctFileBufferBench(dataPath, storageMode).benchAll(queryFile, resPath);
                 } else if(benchParams[0].equals("SuccinctFileBuffer-TFS")) {
                     System.out.println("Benchmarking all methods for SuccinctFileBuffer (from TFS)...");
-                    new TFSSuccinctFileBufferBench(tfsPath, dataPath).benchAll(queryFile, resPath);
+                    new TFSSuccinctFileBufferBench(tfsPath, dataPath, threads, extrLen).benchAll(queryFile, resPath);
                 } else if(benchParams[0].equals("SuccinctStream")) {
                     System.out.println("Benchmarking all methods for SuccinctStream...");
                     new SuccinctStreamBench(dataPath).benchAll(resPath);
@@ -122,13 +133,16 @@ public class Benchmark {
                 } else if(benchParams[0].equals("SuccinctFileBuffer")) {
                     if(benchParams[1].equals("count")) {
                         System.out.println("Benchmarking SuccinctFileBuffer.count...");
-                        new SuccinctFileBufferBench(dataPath, storageMode).benchCountLatency(queryFile, resPath);
+                        new SuccinctFileBufferBench(dataPath, storageMode, threads, extrLen)
+                            .benchCountLatency(queryFile, resPath);
                     } else if(benchParams[1].equals("search")) {
                         System.out.println("Benchmarking SuccinctFileBuffer.search...");
-                        new SuccinctFileBufferBench(dataPath, storageMode).benchSearchLatency(queryFile, resPath);
+                        new SuccinctFileBufferBench(dataPath, storageMode, threads, extrLen)
+                            .benchSearchLatency(queryFile, resPath);
                     } else if(benchParams[1].equals("extract")) {
                         System.out.println("Benchmarking SuccinctFileBuffer.extract...");
-                        new SuccinctFileBufferBench(dataPath, storageMode).benchExtractLatency(resPath);
+                        new SuccinctFileBufferBench(dataPath, storageMode, threads, extrLen)
+                            .benchExtractLatency(resPath);
                     } else {
                         System.out.println("Invalid benchmark specification.");
                         formatter.printHelp("succinct-perf", options);
@@ -137,13 +151,16 @@ public class Benchmark {
                 } else if(benchParams[0].equals("SuccinctFileBuffer-TFS")) {
                     if(benchParams[1].equals("count")) {
                         System.out.println("Benchmarking SuccinctFileBuffer.count (from TFS)...");
-                        new TFSSuccinctFileBufferBench(tfsPath, dataPath).benchCountLatency(queryFile, resPath);
+                        new TFSSuccinctFileBufferBench(tfsPath, dataPath, threads, extrLen)
+                            .benchCountLatency(queryFile, resPath);
                     } else if(benchParams[1].equals("search")) {
                         System.out.println("Benchmarking SuccinctFileBuffer.search (from TFS)...");
-                        new TFSSuccinctFileBufferBench(tfsPath, dataPath).benchSearchLatency(queryFile, resPath);
+                        new TFSSuccinctFileBufferBench(tfsPath, dataPath, threads, extrLen)
+                            .benchSearchLatency(queryFile, resPath);
                     } else if(benchParams[2].equals("extract")) {
                         System.out.println("Benchmarking SuccinctFileBuffer.extract (from TFS)...");
-                        new TFSSuccinctFileBufferBench(tfsPath, dataPath).benchExtractLatency(resPath);
+                        new TFSSuccinctFileBufferBench(tfsPath, dataPath, threads, extrLen)
+                            .benchExtractLatency(resPath);
                     } else {
                         System.out.println("Invalid benchmark specification.");
                         formatter.printHelp("succinct-perf", options);

@@ -23,24 +23,21 @@ public class SuccinctFileBufferBench {
 
     private SuccinctFileBuffer buffer;
 
-    public SuccinctFileBufferBench() {
-        buffer = new SuccinctFileBuffer();
-        NUM_THREADS = 1;
-        EXTRACT_LENGTH = 1000;
-    }
-
     public SuccinctFileBufferBench(String serializedDataPath, StorageMode storageMode) {
-        this();
-        buffer = new SuccinctFileBuffer(serializedDataPath, storageMode);
+        this(new SuccinctFileBuffer(serializedDataPath, storageMode), 1, 1000);
     }
 
     public SuccinctFileBufferBench(String serializedDataPath, StorageMode storageMode, int threads, int extrLen) {
-        buffer = new SuccinctFileBuffer(serializedDataPath, storageMode);
+        this(new SuccinctFileBuffer(serializedDataPath, storageMode), threads, extrLen);
+    }
+
+    public SuccinctFileBufferBench(SuccinctFileBuffer buf, int threads, int extrLen) {
+        this.buffer = buf;
         NUM_THREADS = threads;
         EXTRACT_LENGTH = extrLen;
     }
 
-    public void setSuccinctFileBuffer(SuccinctFileBuffer buf) {
+    public void setFileBuffer(SuccinctFileBuffer buf) {
         this.buffer = buf;
     }
 
@@ -179,6 +176,10 @@ public class SuccinctFileBufferBench {
         for (int i = 0; i < NUM_THREADS; i++) {
             int offset = i/NUM_THREADS * randoms.length;
             benchTasks[i] = new ExtractBenchTask(randoms, offset);
+        }
+
+        for (int i = 0; i < NUM_THREADS; i++) {
+            resAccumulator.add(executor.submit(benchTasks[i]));
         }
 
         for (Future<Integer> result : resAccumulator) {
