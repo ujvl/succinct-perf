@@ -5,14 +5,22 @@ import edu.berkeley.cs.succinct.buffers.SuccinctFileBuffer;
 import edu.berkeley.cs.succinct.perf.BenchmarkUtils;
 
 import java.io.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
 
 public class SuccinctFileBufferBench {
     private static final int WARMUP_QUERIES = 10000;
     private static final int MAX_QUERIES = 100000;
-    private final int EXTRACT_LENGTH;
+
+    private static final int WARMUP_TIME = 300; // seconds
+    private static final int COOLDOWN_TIME = 300; // seconds
+    private static final int MEASUREMENT_TIME = 600; // seconds
+    private static final int TOTAL_EXEC_TIME = WARMUP_TIME + MEASUREMENT_TIME + COOLDOWN_TIME;
+
     private final int NUM_THREADS;
+    private final int EXTRACT_LENGTH;
+
     private SuccinctFileBuffer buffer;
 
     public SuccinctFileBufferBench() {
@@ -128,17 +136,43 @@ public class SuccinctFileBufferBench {
         bufferedWriter.close();
     }
 
-    public void benchSearchThroughput(String resPath) throws IOException {
+    public void benchSearchThroughput(String queryFile, String resPath) throws IOException {
         System.out.println("Benchmarking search throughput with " + NUM_THREADS + " threads...");
+        String[] queries = BenchmarkUtils.readQueryFile(queryFile, MAX_QUERIES);
+        int queriesExecuted = 0;
+
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
+        List<Future<Integer>> resAccumulator = new ArrayList<>(NUM_THREADS);
+        Callable<Integer>[] benchTasks = new SearchBenchTask[NUM_THREADS];
 
         for (int i = 0; i < NUM_THREADS; i++) {
-
+            int offset = i/NUM_THREADS * queries.length;
+            benchTasks[i] = new SearchBenchTask(queries, offset);
         }
+
+        for (int i = 0; i < NUM_THREADS; i++) {
+            resAccumulator.add(executor.submit(benchTasks[i]));
+        }
+
+        try {
+            for (Future<Integer> result : resAccumulator) {
+                queriesExecuted += result.get();
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        System.out.println("Queries executed per second: " + queriesExecuted/TOTAL_EXEC_TIME);
+        executor.shutdown();
 
     }
 
     public void benchExtractThroughput(String resPath) throws IOException {
         System.out.println("Benchmarking extract throughput with " + NUM_THREADS + " threads...");
+        //String[] queries = BenchmarkUtils.readQueryFile(queryFile, MAX_QUERIES);
+        int queriesExecuted = 0;
+
         for (int i = 0; i < NUM_THREADS; i++) {
 
         }
