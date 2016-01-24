@@ -136,7 +136,9 @@ public class SuccinctFileBufferBench {
         bufferedWriter.close();
     }
 
-    public void benchSearchThroughput(String queryFile, String resPath) throws IOException {
+    public void benchSearchThroughput(String queryFile) throws IOException,
+        InterruptedException, ExecutionException {
+
         System.out.println("Benchmarking search throughput with " + NUM_THREADS + " threads...");
         String[] queries = BenchmarkUtils.readQueryFile(queryFile, MAX_QUERIES);
         int queriesExecuted = 0;
@@ -154,24 +156,20 @@ public class SuccinctFileBufferBench {
             resAccumulator.add(executor.submit(benchTasks[i]));
         }
 
-        try {
-            for (Future<Integer> result : resAccumulator) {
-                queriesExecuted += result.get();
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            return;
+        for (Future<Integer> result : resAccumulator) {
+            queriesExecuted += result.get();
         }
 
-        System.out.println("Queries executed per second: " + queriesExecuted/TOTAL_EXEC_TIME);
+        System.out.println("Search queries executed per second: " + queriesExecuted/TOTAL_EXEC_TIME);
         executor.shutdown();
 
     }
 
-    public void benchExtractThroughput(String resPath) throws IOException {
+    public void benchExtractThroughput() throws IOException,
+        InterruptedException, ExecutionException {
+
         System.out.println("Benchmarking extract throughput with " + NUM_THREADS + " threads...");
         long[] randoms = BenchmarkUtils.generateRandoms(MAX_QUERIES, buffer.getOriginalSize() - EXTRACT_LENGTH);
-
         int queriesExecuted = 0;
 
         ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
@@ -183,24 +181,21 @@ public class SuccinctFileBufferBench {
             benchTasks[i] = new ExtractBenchTask(randoms, offset);
         }
 
-        try {
-            for (Future<Integer> result : resAccumulator) {
-                queriesExecuted += result.get();
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            return;
+        for (Future<Integer> result : resAccumulator) {
+            queriesExecuted += result.get();
         }
 
-        System.out.println("Queries executed per second: " + queriesExecuted/TOTAL_EXEC_TIME);
+        System.out.println("Extract queries executed per second: " + queriesExecuted/TOTAL_EXEC_TIME);
         executor.shutdown();
 
     }
 
-    public void benchAll(String queryFile, String resPath) throws IOException {
-        benchCountLatency(queryFile, resPath + "_count");
-        benchSearchLatency(queryFile, resPath + "_search");
-        benchExtractLatency(resPath + "_extract");
+    public void benchAll(String queryFile, String resPath) throws IOException, ExecutionException, InterruptedException {
+        benchCountLatency(queryFile, resPath + "_count_lat");
+        benchSearchLatency(queryFile, resPath + "_search_lat");
+        benchExtractLatency(resPath + "_extract_lat");
+        benchSearchThroughput(queryFile);
+        benchExtractThroughput();
     }
 
     private class SearchBenchTask implements Callable<Integer> {

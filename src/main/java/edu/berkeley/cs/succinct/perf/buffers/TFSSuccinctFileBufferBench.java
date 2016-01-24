@@ -16,11 +16,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class TfsSrcSuccFileBufBench extends SuccinctFileBufferBench {
+public class TFSSuccinctFileBufferBench extends SuccinctFileBufferBench {
 
     private static final String READ_TYPE = "NO_CACHE";
 
-    public TfsSrcSuccFileBufBench(String tachyonMasterLoc, String tachyonFilePath) {
+    public TFSSuccinctFileBufferBench(String tachyonMasterLoc, String tachyonFilePath) {
 
         setupTFS(tachyonMasterLoc);
         TachyonURI inFileURI = new TachyonURI(tachyonFilePath);
