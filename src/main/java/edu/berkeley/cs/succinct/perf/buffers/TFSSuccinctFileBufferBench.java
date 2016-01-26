@@ -70,7 +70,7 @@ public class TFSSuccinctFileBufferBench extends SuccinctFileBufferBench {
         TachyonURI masterLoc = new TachyonURI(masterURI);
         TachyonConf tachyonConf = ClientContext.getConf();
         tachyonConf.set(Constants.MASTER_HOSTNAME, masterLoc.getHost());
-        tachyonConf.set(Constants.MASTER_RPC_PORT, Integer.toString(masterLoc.getPort()));
+        tachyonConf.set(Constants.MASTER_PORT, Integer.toString(masterLoc.getPort()));
         ClientContext.reset(tachyonConf);
     }
 
