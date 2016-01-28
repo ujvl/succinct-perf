@@ -66,6 +66,9 @@ public class Benchmark {
                 formatter.printHelp("succinct-perf", options);
                 System.exit(0);
             }
+            else {
+                System.out.println("Benching on file " + dataPath);
+            }
 
             if(resPath == null) {
                 System.out.println("Result path not specified; results will be stored in results/");
@@ -153,13 +156,13 @@ public class Benchmark {
                     } else if(benchParams[1].equals("search-lat")) {
                         System.out.println("Benchmarking SuccinctFileBuffer.search latency (from TFS)...");
                         new TFSSuccinctFileBufferBench(tfsPath, dataPath).benchSearchLatency(queryFile, resPath);
-                    } else if(benchParams[2].equals("extract-lat")) {
+                    } else if(benchParams[1].equals("extract-lat")) {
                         System.out.println("Benchmarking SuccinctFileBuffer.extract latency (from TFS)...");
                         new TFSSuccinctFileBufferBench(tfsPath, dataPath).benchExtractLatency(resPath, extrLen);
-                    } else if(benchParams[2].equals("extract-thr")) {
+                    } else if(benchParams[1].equals("extract-thr")) {
                         System.out.println("Benchmarking SuccinctFileBuffer.extract throughput (from TFS)...");
                         new TFSSuccinctFileBufferBench(tfsPath, dataPath).benchExtractThroughput(extrLen, threads);
-                    } else if(benchParams[2].equals("search-thr")) {
+                    } else if(benchParams[1].equals("search-thr")) {
                         System.out.println("Benchmarking SuccinctFileBuffer.search throughput (from TFS)...");
                         new TFSSuccinctFileBufferBench(tfsPath, dataPath).benchSearchThroughput(queryFile, threads);
                     } else {
@@ -174,7 +177,7 @@ public class Benchmark {
                     } else if(benchParams[1].equals("lookupSA")) {
                         System.out.println("Benchmarking SuccinctStream.lookupSA...");
                         new SuccinctStreamBench(dataPath).benchLookupSA(resPath);
-                    } else if(benchParams[2].equals("lookupISA")) {
+                    } else if(benchParams[1].equals("lookupISA")) {
                         System.out.println("Benchmarking SuccinctStream.lookupISA...");
                         new SuccinctStreamBench(dataPath).benchLookupISA(resPath);
                     } else {
