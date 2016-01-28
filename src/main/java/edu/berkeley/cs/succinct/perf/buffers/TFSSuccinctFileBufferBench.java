@@ -27,10 +27,9 @@ public class TFSSuccinctFileBufferBench extends SuccinctFileBufferBench {
     private static final String READ_TYPE = "NO_CACHE";
     private TachyonFileSystem tfs;
 
-    public TFSSuccinctFileBufferBench(String tachyonMasterLoc, String filePath, int threads, int extrLength) {
+    public TFSSuccinctFileBufferBench(String tachyonMasterLoc, String filePath) {
 
-        super(null, threads, extrLength);
-
+        super(null);
         setupTFS(tachyonMasterLoc);
 
         TachyonURI fileURI = new TachyonURI("/" + filePath);

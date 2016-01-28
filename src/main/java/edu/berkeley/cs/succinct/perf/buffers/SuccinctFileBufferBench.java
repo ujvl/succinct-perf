@@ -18,23 +18,14 @@ public class SuccinctFileBufferBench {
     private static final int MEASUREMENT_TIME = 600; // seconds
     private static final int TOTAL_EXEC_TIME = WARMUP_TIME + MEASUREMENT_TIME + COOLDOWN_TIME;
 
-    private final int NUM_THREADS;
-    private final int EXTRACT_LENGTH;
-
     private SuccinctFileBuffer buffer;
 
     public SuccinctFileBufferBench(String serializedDataPath, StorageMode storageMode) {
-        this(new SuccinctFileBuffer(serializedDataPath, storageMode), 1, 1000);
+        this(new SuccinctFileBuffer(serializedDataPath, storageMode));
     }
 
-    public SuccinctFileBufferBench(String serializedDataPath, StorageMode storageMode, int threads, int extrLen) {
-        this(new SuccinctFileBuffer(serializedDataPath, storageMode), threads, extrLen);
-    }
-
-    public SuccinctFileBufferBench(SuccinctFileBuffer buf, int threads, int extrLen) {
+    public SuccinctFileBufferBench(SuccinctFileBuffer buf) {
         this.buffer = buf;
-        NUM_THREADS = threads;
-        EXTRACT_LENGTH = extrLen;
     }
 
     public void setFileBuffer(SuccinctFileBuffer buf) {
@@ -103,17 +94,17 @@ public class SuccinctFileBufferBench {
         bufferedWriter.close();
     }
 
-    public void benchExtractLatency(String resPath) throws IOException {
+    public void benchExtractLatency(String resPath, int extrLen) throws IOException {
         System.out.println("Benchmarking extract latency...");
 
-        long[] randoms = BenchmarkUtils.generateRandoms(MAX_QUERIES, buffer.getOriginalSize() - EXTRACT_LENGTH);
+        long[] randoms = BenchmarkUtils.generateRandoms(MAX_QUERIES, buffer.getOriginalSize() - extrLen);
 
         double totalTime = 0.0;
         BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(resPath));
 
         long sum = 0, qCount = 0;
         for(long offset: randoms) {
-            sum += buffer.extract((int) offset, EXTRACT_LENGTH).length;
+            sum += buffer.extract((int) offset, extrLen).length;
             qCount++;
             if(qCount >= WARMUP_QUERIES) break;
         }
@@ -122,7 +113,7 @@ public class SuccinctFileBufferBench {
 
         for(long offset: randoms) {
             long start = System.nanoTime();
-            byte[] result = buffer.extract((int) offset, EXTRACT_LENGTH);
+            byte[] result = buffer.extract((int) offset, extrLen);
             long end = System.nanoTime();
             bufferedWriter.write(result.length + "\t" + (end - start) + "\n");
             totalTime += (end - start);
@@ -133,23 +124,23 @@ public class SuccinctFileBufferBench {
         bufferedWriter.close();
     }
 
-    public void benchSearchThroughput(String queryFile) throws IOException,
+    public void benchSearchThroughput(String queryFile, int numThreads) throws IOException,
         InterruptedException, ExecutionException {
 
-        System.out.println("Benchmarking search throughput with " + NUM_THREADS + " threads...");
+        System.out.println("Benchmarking search throughput with " + numThreads + " threads...");
         String[] queries = BenchmarkUtils.readQueryFile(queryFile, MAX_QUERIES);
         int queriesExecuted = 0;
 
-        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
-        List<Future<Integer>> resAccumulator = new ArrayList<>(NUM_THREADS);
-        Callable<Integer>[] benchTasks = new SearchBenchTask[NUM_THREADS];
+        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+        List<Future<Integer>> resAccumulator = new ArrayList<>(numThreads);
+        Callable<Integer>[] benchTasks = new SearchBenchTask[numThreads];
 
-        for (int i = 0; i < NUM_THREADS; i++) {
-            int offset = i/NUM_THREADS * queries.length;
+        for (int i = 0; i < numThreads; i++) {
+            int offset = i/numThreads * queries.length;
             benchTasks[i] = new SearchBenchTask(queries, offset);
         }
 
-        for (int i = 0; i < NUM_THREADS; i++) {
+        for (int i = 0; i < numThreads; i++) {
             resAccumulator.add(executor.submit(benchTasks[i]));
         }
 
@@ -162,23 +153,23 @@ public class SuccinctFileBufferBench {
 
     }
 
-    public void benchExtractThroughput() throws IOException,
+    public void benchExtractThroughput(int extrLen, int numThreads) throws IOException,
         InterruptedException, ExecutionException {
 
-        System.out.println("Benchmarking extract throughput with " + NUM_THREADS + " threads...");
-        long[] randoms = BenchmarkUtils.generateRandoms(MAX_QUERIES, buffer.getOriginalSize() - EXTRACT_LENGTH);
+        System.out.println("Benchmarking extract throughput with " + numThreads + " threads...");
+        long[] randoms = BenchmarkUtils.generateRandoms(MAX_QUERIES, buffer.getOriginalSize() - extrLen);
         int queriesExecuted = 0;
 
-        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
-        List<Future<Integer>> resAccumulator = new ArrayList<>(NUM_THREADS);
-        Callable<Integer>[] benchTasks = new ExtractBenchTask[NUM_THREADS];
+        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+        List<Future<Integer>> resAccumulator = new ArrayList<>(numThreads);
+        Callable<Integer>[] benchTasks = new ExtractBenchTask[numThreads];
 
-        for (int i = 0; i < NUM_THREADS; i++) {
-            int offset = i/NUM_THREADS * randoms.length;
-            benchTasks[i] = new ExtractBenchTask(randoms, offset);
+        for (int i = 0; i < numThreads; i++) {
+            int offset = i/numThreads * randoms.length;
+            benchTasks[i] = new ExtractBenchTask(randoms, extrLen, offset);
         }
 
-        for (int i = 0; i < NUM_THREADS; i++) {
+        for (int i = 0; i < numThreads; i++) {
             resAccumulator.add(executor.submit(benchTasks[i]));
         }
 
@@ -191,12 +182,22 @@ public class SuccinctFileBufferBench {
 
     }
 
-    public void benchAll(String queryFile, String resPath) throws IOException, ExecutionException, InterruptedException {
+    public void benchAll(String queryFile, String resPath, int threads, int extrLength)
+        throws IOException, ExecutionException, InterruptedException {
+        benchAllLatency(queryFile, resPath, extrLength);
+        benchAllThroughput(queryFile, extrLength, threads);
+    }
+
+    public void benchAllLatency(String queryFile, String resPath, int extrLength) throws IOException {
         benchCountLatency(queryFile, resPath + "_count_lat");
         benchSearchLatency(queryFile, resPath + "_search_lat");
-        benchExtractLatency(resPath + "_extract_lat");
-        benchSearchThroughput(queryFile);
-        benchExtractThroughput();
+        benchExtractLatency(resPath + "_extract_lat", extrLength);
+    }
+
+    public void benchAllThroughput(String queryFile, int extrLength, int threads)
+        throws IOException, ExecutionException, InterruptedException {
+        benchSearchThroughput(queryFile, threads);
+        benchExtractThroughput(extrLength, threads);
     }
 
     private class SearchBenchTask implements Callable<Integer> {
@@ -238,13 +239,13 @@ public class SuccinctFileBufferBench {
 
     private class ExtractBenchTask implements Callable<Integer> {
 
-        private int queriesExecuted;
+        private int queriesExecuted, startOffset, extrLen;
         private long[] randoms;
-        private int startOffset;
 
-        public ExtractBenchTask(long[] randoms, int offset) {
+        public ExtractBenchTask(long[] randoms, int extrLen, int offset) {
             queriesExecuted = 0;
             this.randoms = randoms;
+            this.extrLen = extrLen;
             startOffset = offset;
         }
 
@@ -255,18 +256,18 @@ public class SuccinctFileBufferBench {
 
             int i = startOffset;
             while(System.currentTimeMillis() < until) {
-                buffer.extract(randoms[i++], EXTRACT_LENGTH);
+                buffer.extract(randoms[i++], extrLen);
             }
 
             until = System.currentTimeMillis() + MEASUREMENT_TIME*1000L;
             while(System.currentTimeMillis() < until) {
-                buffer.extract(randoms[i++], EXTRACT_LENGTH);
+                buffer.extract(randoms[i++], extrLen);
                 queriesExecuted++;
             }
 
             until = System.currentTimeMillis() + COOLDOWN_TIME*1000L;
             while(System.currentTimeMillis() < until) {
-                buffer.extract(randoms[i++], EXTRACT_LENGTH);
+                buffer.extract(randoms[i++], extrLen);
             }
 
             return queriesExecuted;
