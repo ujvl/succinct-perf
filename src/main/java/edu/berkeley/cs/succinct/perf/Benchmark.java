@@ -149,18 +149,26 @@ public class Benchmark {
                         System.exit(0);
                     }
                 } else if(benchParams[0].equals("SuccinctFileBuffer-TFS")) {
-                    if(benchParams[1].equals("count")) {
-                        System.out.println("Benchmarking SuccinctFileBuffer.count (from TFS)...");
+                    if(benchParams[1].equals("count-lat")) {
+                        System.out.println("Benchmarking SuccinctFileBuffer.count latency (from TFS)...");
                         new TFSSuccinctFileBufferBench(tfsPath, dataPath, threads, extrLen)
                             .benchCountLatency(queryFile, resPath);
-                    } else if(benchParams[1].equals("search")) {
-                        System.out.println("Benchmarking SuccinctFileBuffer.search (from TFS)...");
+                    } else if(benchParams[1].equals("search-lat")) {
+                        System.out.println("Benchmarking SuccinctFileBuffer.search latency (from TFS)...");
                         new TFSSuccinctFileBufferBench(tfsPath, dataPath, threads, extrLen)
                             .benchSearchLatency(queryFile, resPath);
-                    } else if(benchParams[2].equals("extract")) {
-                        System.out.println("Benchmarking SuccinctFileBuffer.extract (from TFS)...");
+                    } else if(benchParams[2].equals("extract-lat")) {
+                        System.out.println("Benchmarking SuccinctFileBuffer.extract latency (from TFS)...");
                         new TFSSuccinctFileBufferBench(tfsPath, dataPath, threads, extrLen)
                             .benchExtractLatency(resPath);
+                    } else if(benchParams[2].equals("extract-thr")) {
+                        System.out.println("Benchmarking SuccinctFileBuffer.extract throughput (from TFS)...");
+                        new TFSSuccinctFileBufferBench(tfsPath, dataPath, threads, extrLen)
+                            .benchExtractThroughput();
+                    } else if(benchParams[2].equals("search-thr")) {
+                        System.out.println("Benchmarking SuccinctFileBuffer.search throughput (from TFS)...");
+                        new TFSSuccinctFileBufferBench(tfsPath, dataPath, threads, extrLen)
+                            .benchSearchThroughput(queryFile);
                     } else {
                         System.out.println("Invalid benchmark specification.");
                         formatter.printHelp("succinct-perf", options);
