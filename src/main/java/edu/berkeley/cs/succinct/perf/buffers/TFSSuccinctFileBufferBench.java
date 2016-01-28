@@ -44,6 +44,7 @@ public class TFSSuccinctFileBufferBench extends SuccinctFileBufferBench {
 
             TachyonFile file = tfs.open(fileURI);
             if (file == null) {
+                System.out.println("Copying file to tachyon...");
                 File src = new File(filePath);
                 FileOutStream os = closer.register(tfs.getOutStream(fileURI, OutStreamOptions.defaults()));
                 FileInputStream in = closer.register(new FileInputStream(src));
@@ -56,8 +57,10 @@ public class TFSSuccinctFileBufferBench extends SuccinctFileBufferBench {
                 }
             }
 
+            System.out.println("Reading tachyon file byte buffer");
             ByteBuffer byteBuffer = readByteBuf(tfs.open(fileURI), readOptions);
             setFileBuffer(new SuccinctFileBuffer(byteBuffer));
+            System.out.println("Done loading SuccinctFileBuffer!");
 
         } catch (TachyonException|IOException e) {
             e.printStackTrace();
