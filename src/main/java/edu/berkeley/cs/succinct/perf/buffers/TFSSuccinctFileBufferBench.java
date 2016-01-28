@@ -41,7 +41,7 @@ public class TFSSuccinctFileBufferBench extends SuccinctFileBufferBench {
 
             tfs = TachyonFileSystem.TachyonFileSystemFactory.get();
 
-            TachyonFile file = null; //tfs.open(fileURI);
+            TachyonFile file = tfs.open(fileURI);
             if (file == null) {
                 System.out.println("Copying file to tachyon...");
                 File src = new File(filePath);
