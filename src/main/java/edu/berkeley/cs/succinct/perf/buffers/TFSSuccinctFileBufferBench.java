@@ -6,7 +6,6 @@ import tachyon.Constants;
 import tachyon.TachyonURI;
 import tachyon.client.ClientContext;
 import tachyon.client.ReadType;
-import tachyon.client.WriteType;
 import tachyon.client.file.FileInStream;
 import tachyon.client.file.FileOutStream;
 import tachyon.client.file.TachyonFile;
@@ -15,7 +14,6 @@ import tachyon.client.file.options.InStreamOptions;
 import tachyon.client.file.options.OutStreamOptions;
 import tachyon.conf.TachyonConf;
 import tachyon.exception.TachyonException;
-import tachyon.thrift.FileInfo;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,30 +34,29 @@ public class TFSSuccinctFileBufferBench extends SuccinctFileBufferBench {
         setupTFS(tachyonMasterLoc);
 
         TachyonURI fileURI = new TachyonURI("/" + filePath);
-        File src = new File(filePath);
-
-        try (Closer closer = Closer.create()) {
-            FileOutStream os = closer.register(tfs.getOutStream(fileURI, OutStreamOptions.defaults()));
-            FileInputStream in = closer.register(new FileInputStream(src));
-            FileChannel channel = closer.register(in.getChannel());
-            ByteBuffer buf = ByteBuffer.allocate(8 * Constants.MB);
-            while (channel.read(buf) != -1) {
-                buf.flip();
-                os.write(buf.array(), 0, buf.limit());
-            }
-        } catch (IOException|TachyonException e) {
-            e.printStackTrace();
-        }
 
         ReadType rType = ReadType.valueOf(READ_TYPE);
         InStreamOptions readOptions = new InStreamOptions.Builder(ClientContext.getConf()).setReadType(rType).build();
 
-        try {
+        try (Closer closer = Closer.create()) {
 
             tfs = TachyonFileSystem.TachyonFileSystemFactory.get();
-            TachyonFile file = tfs.open(fileURI);
-            ByteBuffer byteBuffer = readByteBuf(file, readOptions);
 
+            TachyonFile file = tfs.open(fileURI);
+            if (file == null) {
+                File src = new File(filePath);
+                FileOutStream os = closer.register(tfs.getOutStream(fileURI, OutStreamOptions.defaults()));
+                FileInputStream in = closer.register(new FileInputStream(src));
+                FileChannel channel = closer.register(in.getChannel());
+                ByteBuffer buf = ByteBuffer.allocate(8 * Constants.MB);
+
+                while (channel.read(buf) != -1) {
+                    buf.flip();
+                    os.write(buf.array(), 0, buf.limit());
+                }
+            }
+
+            ByteBuffer byteBuffer = readByteBuf(tfs.open(fileURI), readOptions);
             setFileBuffer(new SuccinctFileBuffer(byteBuffer));
 
         } catch (TachyonException|IOException e) {
