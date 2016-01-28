@@ -1,32 +1,55 @@
 package edu.berkeley.cs.succinct.perf.buffers;
 
+import com.google.common.io.Closer;
 import edu.berkeley.cs.succinct.buffers.SuccinctFileBuffer;
 import tachyon.Constants;
 import tachyon.TachyonURI;
 import tachyon.client.ClientContext;
 import tachyon.client.ReadType;
+import tachyon.client.WriteType;
 import tachyon.client.file.FileInStream;
+import tachyon.client.file.FileOutStream;
 import tachyon.client.file.TachyonFile;
 import tachyon.client.file.TachyonFileSystem;
 import tachyon.client.file.options.InStreamOptions;
+import tachyon.client.file.options.OutStreamOptions;
 import tachyon.conf.TachyonConf;
 import tachyon.exception.TachyonException;
+import tachyon.thrift.FileInfo;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
 
 public class TFSSuccinctFileBufferBench extends SuccinctFileBufferBench {
 
     private static final String READ_TYPE = "NO_CACHE";
     private TachyonFileSystem tfs;
 
-    public TFSSuccinctFileBufferBench(String tachyonMasterLoc, String tachyonFilePath, int threads, int extrLength) {
+    public TFSSuccinctFileBufferBench(String tachyonMasterLoc, String filePath, int threads, int extrLength) {
 
         super(null, threads, extrLength);
 
         setupTFS(tachyonMasterLoc);
-        TachyonURI inFileURI = new TachyonURI(tachyonFilePath);
+
+        TachyonURI fileURI = new TachyonURI("/" + filePath);
+        File src = new File(filePath);
+
+        try (Closer closer = Closer.create()) {
+            FileOutStream os = closer.register(tfs.getOutStream(fileURI, OutStreamOptions.defaults()));
+            FileInputStream in = closer.register(new FileInputStream(src));
+            FileChannel channel = closer.register(in.getChannel());
+            ByteBuffer buf = ByteBuffer.allocate(8 * Constants.MB);
+            while (channel.read(buf) != -1) {
+                buf.flip();
+                os.write(buf.array(), 0, buf.limit());
+            }
+        } catch (IOException|TachyonException e) {
+            e.printStackTrace();
+        }
 
         ReadType rType = ReadType.valueOf(READ_TYPE);
         InStreamOptions readOptions = new InStreamOptions.Builder(ClientContext.getConf()).setReadType(rType).build();
@@ -34,7 +57,7 @@ public class TFSSuccinctFileBufferBench extends SuccinctFileBufferBench {
         try {
 
             tfs = TachyonFileSystem.TachyonFileSystemFactory.get();
-            TachyonFile file = tfs.open(inFileURI);
+            TachyonFile file = tfs.open(fileURI);
             ByteBuffer byteBuffer = readByteBuf(file, readOptions);
 
             setFileBuffer(new SuccinctFileBuffer(byteBuffer));
@@ -45,6 +68,8 @@ public class TFSSuccinctFileBufferBench extends SuccinctFileBufferBench {
         }
 
     }
+
+
 
     /**
      * Reads ByteBuffer in from file existing in tfs
