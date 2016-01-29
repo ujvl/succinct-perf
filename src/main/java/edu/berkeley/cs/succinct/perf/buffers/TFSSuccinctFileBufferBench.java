@@ -85,7 +85,7 @@ public class TFSSuccinctFileBufferBench extends SuccinctFileBufferBench {
         FileInStream inStream = tfs.getInStream(file, readOps);
         ByteBuffer buf = ByteBuffer.allocate((int) inStream.remaining());
         inStream.read(buf.array());
-        buf.order(ByteOrder.LITTLE_ENDIAN);
+        buf.order(ByteOrder.BIG_ENDIAN);
         return buf;
     }
 
