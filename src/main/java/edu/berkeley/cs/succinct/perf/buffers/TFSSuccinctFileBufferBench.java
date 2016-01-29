@@ -47,16 +47,7 @@ public class TFSSuccinctFileBufferBench extends SuccinctFileBufferBench {
             } catch (InvalidPathException e) {
                 System.out.println("File does not exist on tfs. Attempting to copy file from local to tfs...");
                 long start = System.currentTimeMillis();
-                File src = new File(filePath);
-                assert src.exists();
-                FileOutStream os = closer.register(tfs.getOutStream(fileURI, OutStreamOptions.defaults()));
-                FileInputStream in = closer.register(new FileInputStream(src));
-                FileChannel channel = closer.register(in.getChannel());
-                ByteBuffer buf = ByteBuffer.allocate(8 * Constants.MB);
-                while (channel.read(buf) != -1) {
-                    buf.flip();
-                    os.write(buf.array(), 0, buf.limit());
-                }
+                copyFile(filePath, fileURI, closer);
                 long stop = System.currentTimeMillis();
                 System.out.println("Copied file to tfs!\nTime taken: " + (stop-start)/1000);
             }
@@ -72,6 +63,29 @@ public class TFSSuccinctFileBufferBench extends SuccinctFileBufferBench {
             System.exit(-1);
         }
 
+    }
+
+    /**
+     * Copies file to tfs from inPath to outURI
+     * @param inPath path of input file
+     * @param outURI tachyon uri of output file
+     * @param closer closer used in file copying
+     * @throws IOException
+     * @throws TachyonException
+     */
+    private void copyFile(String inPath, TachyonURI outURI, Closer closer) throws IOException, TachyonException {
+        File src = new File(inPath);
+        assert src.exists();
+        OutStreamOptions.Builder opt = new OutStreamOptions.Builder(ClientContext.getConf());
+        opt.setBlockSizeBytes(1610612736);
+        FileOutStream os = closer.register(tfs.getOutStream(outURI, opt.build()));
+        FileInputStream in = closer.register(new FileInputStream(src));
+        FileChannel channel = closer.register(in.getChannel());
+        ByteBuffer buf = ByteBuffer.allocate(8 * Constants.MB);
+        while (channel.read(buf) != -1) {
+            buf.flip();
+            os.write(buf.array(), 0, buf.limit());
+        }
     }
 
     /**
