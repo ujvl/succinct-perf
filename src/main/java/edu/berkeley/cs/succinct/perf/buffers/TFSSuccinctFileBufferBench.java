@@ -13,6 +13,7 @@ import tachyon.client.file.TachyonFileSystem;
 import tachyon.client.file.options.InStreamOptions;
 import tachyon.client.file.options.OutStreamOptions;
 import tachyon.conf.TachyonConf;
+import tachyon.exception.InvalidPathException;
 import tachyon.exception.TachyonException;
 
 import java.io.File;
@@ -41,22 +42,26 @@ public class TFSSuccinctFileBufferBench extends SuccinctFileBufferBench {
 
             tfs = TachyonFileSystem.TachyonFileSystemFactory.get();
 
-            TachyonFile file = tfs.open(fileURI);
-            if (file == null) {
-                System.out.println("Copying file to tachyon...");
+            try {
+                tfs.open(fileURI);
+            } catch (InvalidPathException e) {
+                System.out.println("File does not exist on tfs. Attempting to copy file from local to tfs...");
+                long start = System.currentTimeMillis();
                 File src = new File(filePath);
+                assert src.exists();
                 FileOutStream os = closer.register(tfs.getOutStream(fileURI, OutStreamOptions.defaults()));
                 FileInputStream in = closer.register(new FileInputStream(src));
                 FileChannel channel = closer.register(in.getChannel());
                 ByteBuffer buf = ByteBuffer.allocate(8 * Constants.MB);
-
                 while (channel.read(buf) != -1) {
                     buf.flip();
                     os.write(buf.array(), 0, buf.limit());
                 }
+                long stop = System.currentTimeMillis();
+                System.out.println("Copied file to tfs!\nTime taken: " + (stop-start)/1000);
             }
 
-            System.out.println("Reading tachyon file byte buffer");
+            System.out.println("Reading tachyon file ByteBuffer...");
             ByteBuffer byteBuffer = readByteBuf(tfs.open(fileURI), readOptions);
             setFileBuffer(new SuccinctFileBuffer(byteBuffer));
             System.out.println("Done loading SuccinctFileBuffer!");
@@ -67,8 +72,6 @@ public class TFSSuccinctFileBufferBench extends SuccinctFileBufferBench {
         }
 
     }
-
-
 
     /**
      * Reads ByteBuffer in from file existing in tfs
@@ -82,7 +85,7 @@ public class TFSSuccinctFileBufferBench extends SuccinctFileBufferBench {
         FileInStream inStream = tfs.getInStream(file, readOps);
         ByteBuffer buf = ByteBuffer.allocate((int) inStream.remaining());
         inStream.read(buf.array());
-        buf.order(ByteOrder.BIG_ENDIAN);
+        buf.order(ByteOrder.LITTLE_ENDIAN);
         return buf;
     }
 
