@@ -26,9 +26,9 @@ public class VanillaTachyonBench {
     private static final int WARMUP_QUERIES = 10000;
     private static final int MAX_THR_EXT_QUERIES = 100000000;
 
-    private static final int WARMUP_TIME = 180; // seconds
-    private static final int COOLDOWN_TIME = 180; // seconds
-    private static final int MEASUREMENT_TIME = 360; // seconds
+    private static final int WARMUP_TIME = 300; // seconds
+    private static final int COOLDOWN_TIME = 300; // seconds
+    private static final int MEASUREMENT_TIME = 600; // seconds
 
     private TachyonFileSystem tfs;
     private ByteBuffer buf;
@@ -163,12 +163,16 @@ public class VanillaTachyonBench {
 
             long until = System.currentTimeMillis() + WARMUP_TIME*1000L;
             int i = startOffset;
+            int lim = randoms.length;
 
             byte[] result = new byte[extrLen];
 
             while(System.currentTimeMillis() < until) {
                 for (int j = 0; j < extrLen; j++) {
                     result[j] = buf.get((int) randoms[i++] + j);
+                }
+                if (i == lim) {
+                    i = 0;
                 }
             }
 
@@ -177,6 +181,9 @@ public class VanillaTachyonBench {
                 for (int j = 0; j < extrLen; j++) {
                     result[j] = buf.get((int) randoms[i++] + j);
                 }
+                if (i == lim) {
+                    i = 0;
+                }
                 queriesExecuted++;
             }
 
@@ -184,6 +191,9 @@ public class VanillaTachyonBench {
             while(System.currentTimeMillis() < until) {
                 for (int j = 0; j < extrLen; j++) {
                     result[j] = buf.get((int) randoms[i++] + j);
+                }
+                if (i == lim) {
+                    i = 0;
                 }
             }
 
