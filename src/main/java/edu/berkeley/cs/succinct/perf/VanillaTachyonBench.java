@@ -80,7 +80,9 @@ public class VanillaTachyonBench {
         long sum = 0, qCount = 0;
         byte[] result = new byte[extrLen];
         for(long offset: randoms) {
-            buf.get(result, (int) offset, extrLen);
+            for (int i = 0; i < extrLen; i++) {
+                result[i] = buf.get((int) offset);
+            }
             sum += extrLen;
             qCount++;
             if(qCount >= WARMUP_QUERIES) break;
@@ -90,7 +92,9 @@ public class VanillaTachyonBench {
 
         for(long offset: randoms) {
             long start = System.nanoTime();
-            buf.get(result, (int) offset, extrLen);
+            for (int i = 0; i < extrLen; i++) {
+                result[i] = buf.get((int) offset);
+            }
             long end = System.nanoTime();
             bufferedWriter.write(new String(result) + "\t" + (end - start) + "\n");
             totalTime += (end - start);
