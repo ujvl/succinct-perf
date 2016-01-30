@@ -26,9 +26,9 @@ public class VanillaTachyonBench {
     private static final int WARMUP_QUERIES = 10000;
     private static final int MAX_THR_EXT_QUERIES = 100000000;
 
-    private static final int WARMUP_TIME = 300; // seconds
-    private static final int COOLDOWN_TIME = 300; // seconds
-    private static final int MEASUREMENT_TIME = 600; // seconds
+    private static final int WARMUP_TIME = 120; // seconds
+    private static final int COOLDOWN_TIME = 120; // seconds
+    private static final int MEASUREMENT_TIME = 240; // seconds
 
     private TachyonFileSystem tfs;
     private ByteBuffer buf;
