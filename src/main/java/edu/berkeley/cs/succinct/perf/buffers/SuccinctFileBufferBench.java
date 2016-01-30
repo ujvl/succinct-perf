@@ -179,7 +179,7 @@ public class SuccinctFileBufferBench {
             queriesExecuted += result.get();
         }
 
-        System.out.println("Extract queries executed per second: " + queriesExecuted/TOTAL_EXEC_TIME);
+        System.out.println("Extract queries executed per second: " + queriesExecuted/MEASUREMENT_TIME);
         executor.shutdown();
 
     }
@@ -218,8 +218,8 @@ public class SuccinctFileBufferBench {
         public Integer call() {
 
             long until = System.currentTimeMillis() + WARMUP_TIME*1000L;
-
             int i = startOffset;
+
             while(System.currentTimeMillis() < until) {
                 buffer.search(queries[i++].getBytes());
             }
@@ -255,8 +255,8 @@ public class SuccinctFileBufferBench {
         public Integer call() {
 
             long until = System.currentTimeMillis() + WARMUP_TIME*1000L;
-
             int i = startOffset;
+
             while(System.currentTimeMillis() < until) {
                 buffer.extract(randoms[i++], extrLen);
             }

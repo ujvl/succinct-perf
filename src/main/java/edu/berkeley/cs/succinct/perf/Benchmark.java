@@ -112,6 +112,9 @@ public class Benchmark {
                 } else if(benchParams[0].equals("SuccinctFileStream")) {
                     System.out.println("Benchmarking all methods for SuccinctFileStream...");
                     new SuccinctFileStreamBench(dataPath).benchAll(queryFile, resPath);
+                } else if(benchParams[0].equals("VanillaTachyon")) {
+                    System.out.println("Benchmarking all methods for VanillaTachyon...");
+                    new VanillaTachyonBench(tfsPath, dataPath).benchAll(resPath, extrLen);
                 } else {
                     System.out.println("Invalid benchmark specification.");
                     System.out.println("Test class must be one of SuccinctBuffer, SuccinctFileBuffer, SuccinctFileBuffer-TFS, SuccinctStream, SuccinctFileStream or all");
