@@ -93,7 +93,7 @@ public class VanillaTachyonBench {
         for(long offset: randoms) {
             long start = System.nanoTime();
             for (int i = 0; i < extrLen; i++) {
-                result[i] = buf.get((int) offset);
+                result[i] = buf.get((int) offset + i);
             }
             long end = System.nanoTime();
             bufferedWriter.write(new String(result) + "\t" + (end - start) + "\n");
