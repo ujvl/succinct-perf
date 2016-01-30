@@ -81,7 +81,7 @@ public class VanillaTachyonBench {
         byte[] result = new byte[extrLen];
         for(long offset: randoms) {
             for (int i = 0; i < extrLen; i++) {
-                result[i] = buf.get((int) offset);
+                result[i] = buf.get((int) offset + i);
             }
             sum += extrLen;
             qCount++;
