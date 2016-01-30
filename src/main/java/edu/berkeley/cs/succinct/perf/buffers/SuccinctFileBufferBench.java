@@ -12,6 +12,7 @@ import java.util.concurrent.*;
 public class SuccinctFileBufferBench {
     private static final int WARMUP_QUERIES = 10000;
     private static final int MAX_QUERIES = 100000;
+    private static final int MAX_THR_EXT_QUERIES = 10000000;
 
     private static final int WARMUP_TIME = 300; // seconds
     private static final int COOLDOWN_TIME = 300; // seconds
@@ -157,7 +158,8 @@ public class SuccinctFileBufferBench {
         InterruptedException, ExecutionException {
 
         System.out.println("Benchmarking extract throughput with " + numThreads + " threads...");
-        long[] randoms = BenchmarkUtils.generateRandoms(MAX_QUERIES, buffer.getOriginalSize() - extrLen);
+        long[] randoms = BenchmarkUtils.generateRandoms(MAX_THR_EXT_QUERIES, buffer.getOriginalSize() - extrLen);
+        System.out.println("Generated " + MAX_THR_EXT_QUERIES + " extract queries. Starting benchmark...");
         int queriesExecuted = 0;
 
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
