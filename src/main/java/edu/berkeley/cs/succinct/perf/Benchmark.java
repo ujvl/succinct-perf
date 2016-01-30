@@ -114,7 +114,7 @@ public class Benchmark {
                     new SuccinctFileStreamBench(dataPath).benchAll(queryFile, resPath);
                 } else if(benchParams[0].equals("VanillaTachyon")) {
                     System.out.println("Benchmarking all methods for VanillaTachyon...");
-                    new VanillaTachyonBench(tfsPath, dataPath).benchAll(resPath, extrLen);
+                    new VanillaTachyonBench(tfsPath, dataPath).benchAll(resPath, extrLen, threads);
                 } else {
                     System.out.println("Invalid benchmark specification.");
                     System.out.println("Test class must be one of SuccinctBuffer, SuccinctFileBuffer, SuccinctFileBuffer-TFS, SuccinctStream, SuccinctFileStream or all");
@@ -129,7 +129,7 @@ public class Benchmark {
                     } else if(benchParams[1].equals("lookupSA")) {
                         System.out.println("Benchmarking SuccinctBuffer.lookupSA...");
                         new SuccinctBufferBench(dataPath, storageMode).benchLookupSA(resPath);
-                    } else if(benchParams[2].equals("lookupISA")) {
+                    } else if(benchParams[1].equals("lookupISA")) {
                         System.out.println("Benchmarking SuccinctBuffer.lookupISA...");
                         new SuccinctBufferBench(dataPath, storageMode).benchLookupISA(resPath);
                     } else {
@@ -153,25 +153,32 @@ public class Benchmark {
                         System.exit(0);
                     }
                 } else if(benchParams[0].equals("SuccinctFileBuffer-TFS")) {
-                    if(benchParams[1].equals("count-lat")) {
+                    if (benchParams[1].equals("count-lat")) {
                         System.out.println("Benchmarking SuccinctFileBuffer.count latency (from TFS)...");
                         new TFSSuccinctFileBufferBench(tfsPath, dataPath).benchCountLatency(queryFile, resPath);
-                    } else if(benchParams[1].equals("search-lat")) {
+                    } else if (benchParams[1].equals("search-lat")) {
                         System.out.println("Benchmarking SuccinctFileBuffer.search latency (from TFS)...");
                         new TFSSuccinctFileBufferBench(tfsPath, dataPath).benchSearchLatency(queryFile, resPath);
-                    } else if(benchParams[1].equals("extract-lat")) {
+                    } else if (benchParams[1].equals("extract-lat")) {
                         System.out.println("Benchmarking SuccinctFileBuffer.extract latency (from TFS)...");
                         new TFSSuccinctFileBufferBench(tfsPath, dataPath).benchExtractLatency(resPath, extrLen);
-                    } else if(benchParams[1].equals("extract-thr")) {
+                    } else if (benchParams[1].equals("extract-thr")) {
                         System.out.println("Benchmarking SuccinctFileBuffer.extract throughput (from TFS)...");
                         new TFSSuccinctFileBufferBench(tfsPath, dataPath).benchExtractThroughput(extrLen, threads);
-                    } else if(benchParams[1].equals("search-thr")) {
+                    } else if (benchParams[1].equals("search-thr")) {
                         System.out.println("Benchmarking SuccinctFileBuffer.search throughput (from TFS)...");
                         new TFSSuccinctFileBufferBench(tfsPath, dataPath).benchSearchThroughput(queryFile, threads);
                     } else {
                         System.out.println("Invalid benchmark specification.");
                         formatter.printHelp("succinct-perf", options);
                         System.exit(0);
+                    }
+                } else if (benchParams[0].equals("VanillaTachyon")) {
+                    if (benchParams[1].equals("extr-lat")) {
+                        new VanillaTachyonBench(tfsPath, dataPath).benchExtractLatency(resPath, extrLen);
+                    }
+                    else if (benchParams[1].equals("extr-thr")) {
+                        new VanillaTachyonBench(tfsPath, dataPath).benchExtractThroughput(extrLen, threads);
                     }
                 } else if(benchParams[0].equals("SuccinctStream")) {
                     if(benchParams[1].equals("lookupNPA")) {

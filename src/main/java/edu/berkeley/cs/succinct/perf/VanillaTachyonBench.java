@@ -15,12 +15,21 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
 
 public class VanillaTachyonBench {
 
     private static final String READ_TYPE = "NO_CACHE";
     private static final int MAX_QUERIES = 100000;
     private static final int WARMUP_QUERIES = 10000;
+    private static final int MAX_THR_EXT_QUERIES = 10000000;
+
+    private static final int WARMUP_TIME = 300; // seconds
+    private static final int COOLDOWN_TIME = 300; // seconds
+    private static final int MEASUREMENT_TIME = 600; // seconds
+
     private TachyonFileSystem tfs;
     private ByteBuffer buf;
     private long numBytes;
@@ -65,8 +74,10 @@ public class VanillaTachyonBench {
 
     }
 
-    public void benchAll(String resPath, int extrLen) throws IOException {
+    public void benchAll(String resPath, int extrLen, int numThreads)
+        throws IOException, InterruptedException, ExecutionException {
         benchExtractLatency(resPath, extrLen);
+        benchExtractThroughput(extrLen, numThreads);
     }
 
     public void benchExtractLatency(String resPath, int extrLen) throws IOException {
@@ -103,6 +114,81 @@ public class VanillaTachyonBench {
         double avgTime = totalTime / randoms.length;
         System.out.println("Average time per extract query: " + avgTime);
         bufferedWriter.close();
+    }
+
+    public void benchExtractThroughput(int extrLen, int numThreads) throws IOException,
+        InterruptedException, ExecutionException {
+
+        System.out.println("Benchmarking extract throughput with " + numThreads + " threads...");
+        long[] randoms = BenchmarkUtils.generateRandoms(MAX_THR_EXT_QUERIES, (int) numBytes - extrLen);
+        System.out.println("Generated " + MAX_THR_EXT_QUERIES + " extract queries. Starting benchmark...");
+        int queriesExecuted = 0;
+
+        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+        List<Future<Integer>> resAccumulator = new ArrayList<>(numThreads);
+        Callable<Integer>[] benchTasks = new ExtractBenchTask[numThreads];
+
+        for (int i = 0; i < numThreads; i++) {
+            int offset = i/numThreads * randoms.length;
+            benchTasks[i] = new ExtractBenchTask(randoms, extrLen, offset);
+        }
+
+        for (int i = 0; i < numThreads; i++) {
+            resAccumulator.add(executor.submit(benchTasks[i]));
+        }
+
+        for (Future<Integer> result : resAccumulator) {
+            queriesExecuted += result.get();
+        }
+
+        System.out.println("Extract queries executed per second: " + queriesExecuted/MEASUREMENT_TIME);
+        executor.shutdown();
+
+    }
+
+    private class ExtractBenchTask implements Callable<Integer> {
+
+        private int queriesExecuted, startOffset, extrLen;
+        private long[] randoms;
+
+        public ExtractBenchTask(long[] randoms, int extrLen, int offset) {
+            queriesExecuted = 0;
+            this.randoms = randoms;
+            this.extrLen = extrLen;
+            startOffset = offset;
+        }
+
+        @Override
+        public Integer call() {
+
+            long until = System.currentTimeMillis() + WARMUP_TIME*1000L;
+            int i = startOffset;
+
+            byte[] result = new byte[extrLen];
+
+            while(System.currentTimeMillis() < until) {
+                for (int j = 0; j < extrLen; j++) {
+                    result[j] = buf.get((int) randoms[i++] + j);
+                }
+            }
+
+            until = System.currentTimeMillis() + MEASUREMENT_TIME*1000L;
+            while(System.currentTimeMillis() < until) {
+                for (int j = 0; j < extrLen; j++) {
+                    result[j] = buf.get((int) randoms[i++] + j);
+                }
+                queriesExecuted++;
+            }
+
+            until = System.currentTimeMillis() + COOLDOWN_TIME*1000L;
+            while(System.currentTimeMillis() < until) {
+                for (int j = 0; j < extrLen; j++) {
+                    result[j] = buf.get((int) randoms[i++] + j);
+                }
+            }
+
+            return queriesExecuted;
+        }
     }
 
 }

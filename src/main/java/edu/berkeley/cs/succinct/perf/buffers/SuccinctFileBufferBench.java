@@ -17,7 +17,6 @@ public class SuccinctFileBufferBench {
     private static final int WARMUP_TIME = 300; // seconds
     private static final int COOLDOWN_TIME = 300; // seconds
     private static final int MEASUREMENT_TIME = 600; // seconds
-    private static final int TOTAL_EXEC_TIME = WARMUP_TIME + MEASUREMENT_TIME + COOLDOWN_TIME;
 
     private SuccinctFileBuffer buffer;
 
@@ -149,7 +148,7 @@ public class SuccinctFileBufferBench {
             queriesExecuted += result.get();
         }
 
-        System.out.println("Search queries executed per second: " + queriesExecuted/TOTAL_EXEC_TIME);
+        System.out.println("Search queries executed per second: " + queriesExecuted/MEASUREMENT_TIME);
         executor.shutdown();
 
     }
