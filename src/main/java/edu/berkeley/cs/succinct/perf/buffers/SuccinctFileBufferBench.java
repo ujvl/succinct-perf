@@ -12,7 +12,7 @@ import java.util.concurrent.*;
 public class SuccinctFileBufferBench {
     private static final int WARMUP_QUERIES = 10000;
     private static final int MAX_QUERIES = 100000;
-    private static final int MAX_THR_EXT_QUERIES = 10000000;
+    private static final int MAX_THR_EXT_QUERIES = 100000000;
 
     private static final int WARMUP_TIME = 300; // seconds
     private static final int COOLDOWN_TIME = 300; // seconds
@@ -84,7 +84,7 @@ public class SuccinctFileBufferBench {
             byte[] queryBytes = query.getBytes();
             long start = System.nanoTime();
             Long[] results = buffer.search(queryBytes);
-            long end = System.nanoTime();
+            long end = System.nanoTime(); 
             bufferedWriter.write(results.length + "\t" + (end - start) + "\n");
             totalTime += (end - start);
         }

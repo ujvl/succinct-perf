@@ -24,7 +24,7 @@ public class VanillaTachyonBench {
     private static final String READ_TYPE = "NO_CACHE";
     private static final int MAX_QUERIES = 100000;
     private static final int WARMUP_QUERIES = 10000;
-    private static final int MAX_THR_EXT_QUERIES = 100000000;
+    private static final int MAX_THR_EXT_QUERIES = 1000000000;
 
     private static final int WARMUP_TIME = 120; // seconds
     private static final int COOLDOWN_TIME = 120; // seconds
@@ -172,7 +172,7 @@ public class VanillaTachyonBench {
                     result[j] = buf.get((int) randoms[i++] + j);
                 }
                 if (i == lim) {
-                    i = 0;
+                    i = startOffset;
                 }
             }
 
@@ -182,7 +182,7 @@ public class VanillaTachyonBench {
                     result[j] = buf.get((int) randoms[i++] + j);
                 }
                 if (i == lim) {
-                    i = 0;
+                    i = startOffset;
                 }
                 queriesExecuted++;
             }
@@ -193,7 +193,7 @@ public class VanillaTachyonBench {
                     result[j] = buf.get((int) randoms[i++] + j);
                 }
                 if (i == lim) {
-                    i = 0;
+                    i = startOffset;
                 }
             }
 
