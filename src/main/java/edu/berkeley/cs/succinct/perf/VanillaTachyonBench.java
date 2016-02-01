@@ -107,7 +107,8 @@ public class VanillaTachyonBench {
                 result[i] = buf.get((int) offset + i);
             }
             long end = System.nanoTime();
-            bufferedWriter.write(new String(result) + "\t" + (end - start) + "\n");
+            //bufferedWriter.write(new String(result) + "\t" + (end - start) + "\n");
+            bufferedWriter.write((end - start) + "\n");
             totalTime += (end - start);
         }
 

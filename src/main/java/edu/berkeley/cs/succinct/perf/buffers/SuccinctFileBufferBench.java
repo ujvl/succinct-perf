@@ -84,8 +84,9 @@ public class SuccinctFileBufferBench {
             byte[] queryBytes = query.getBytes();
             long start = System.nanoTime();
             Long[] results = buffer.search(queryBytes);
-            long end = System.nanoTime(); 
-            bufferedWriter.write(results.length + "\t" + (end - start) + "\n");
+            long end = System.nanoTime();
+            //bufferedWriter.write(results.length + "\t" + (end - start) + "\n");
+            bufferedWriter.write((end - start) + "\n");
             totalTime += (end - start);
         }
 
@@ -115,7 +116,8 @@ public class SuccinctFileBufferBench {
             long start = System.nanoTime();
             byte[] result = buffer.extract((int) offset, extrLen);
             long end = System.nanoTime();
-            bufferedWriter.write(new String(result) + "\t" + (end - start) + "\n");
+            //bufferedWriter.write(new String(result) + "\t" + (end - start) + "\n");
+            bufferedWriter.write((end - start) + "\n");
             totalTime += (end - start);
         }
 
