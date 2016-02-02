@@ -3,6 +3,7 @@ package edu.berkeley.cs.succinct.perf.buffers;
 import edu.berkeley.cs.succinct.StorageMode;
 import edu.berkeley.cs.succinct.buffers.SuccinctBuffer;
 import edu.berkeley.cs.succinct.perf.BenchmarkUtils;
+import edu.berkeley.cs.succinct.perf.TachyonUtil;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -15,6 +16,10 @@ public class SuccinctBufferBench {
 
     public SuccinctBufferBench(String serializedDataPath, StorageMode storageMode) {
         buffer = new SuccinctBuffer(serializedDataPath, storageMode);
+    }
+
+    public SuccinctBufferBench(String tachyonMasterLoc, String filePath) {
+        buffer = TachyonUtil.getBuffer(tachyonMasterLoc, filePath);
     }
 
     public void benchLookupNPA(String resPath) throws IOException {

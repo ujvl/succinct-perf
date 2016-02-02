@@ -23,7 +23,7 @@ public class TFSSuccinctFileBufferBench extends SuccinctFileBufferBench {
 
     public TFSSuccinctFileBufferBench(String tachyonMasterLoc, String filePath) {
 
-        super(null);
+        super(null, "");
         TachyonUtil.setupTFS(tachyonMasterLoc);
 
         TachyonURI fileURI = new TachyonURI("/" + filePath);
@@ -49,7 +49,7 @@ public class TFSSuccinctFileBufferBench extends SuccinctFileBufferBench {
             System.out.println("Reading tachyon file ByteBuffer...");
             ByteBuffer byteBuffer = TachyonUtil.readByteBuf(tfs, file, readOptions);
 
-            setFileBuffer(new SuccinctFileBuffer(byteBuffer));
+            //setFileBuffer(new SuccinctFileBuffer(byteBuffer));
             System.out.println("Done loading SuccinctFileBuffer!");
 
         } catch (TachyonException|IOException e) {

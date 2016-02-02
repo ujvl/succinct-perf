@@ -3,6 +3,7 @@ package edu.berkeley.cs.succinct.perf.buffers;
 import edu.berkeley.cs.succinct.StorageMode;
 import edu.berkeley.cs.succinct.buffers.SuccinctFileBuffer;
 import edu.berkeley.cs.succinct.perf.BenchmarkUtils;
+import edu.berkeley.cs.succinct.perf.TachyonUtil;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -21,15 +22,11 @@ public class SuccinctFileBufferBench {
     private SuccinctFileBuffer buffer;
 
     public SuccinctFileBufferBench(String serializedDataPath, StorageMode storageMode) {
-        this(new SuccinctFileBuffer(serializedDataPath, storageMode));
+        buffer = new SuccinctFileBuffer(serializedDataPath, storageMode);
     }
 
-    public SuccinctFileBufferBench(SuccinctFileBuffer buf) {
-        this.buffer = buf;
-    }
-
-    public void setFileBuffer(SuccinctFileBuffer buf) {
-        this.buffer = buf;
+    public SuccinctFileBufferBench(String tachyonMasterLoc, String filePath) {
+        buffer = TachyonUtil.getFileBuffer(tachyonMasterLoc, filePath);
     }
 
     public void benchCountLatency(String queryFile, String resPath) throws IOException {
