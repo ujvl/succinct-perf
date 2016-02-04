@@ -82,8 +82,8 @@ public class SuccinctFileBufferBench {
             long start = System.nanoTime();
             Long[] results = buffer.search(queryBytes);
             long end = System.nanoTime();
-            //bufferedWriter.write(results.length + "\t" + (end - start) + "\n");
-            bufferedWriter.write((end - start) + "\n");
+            bufferedWriter.write(results.length + "\t" + (end - start) + "\n");
+            //bufferedWriter.write((end - start) + "\n");
             totalTime += (end - start);
         }
 

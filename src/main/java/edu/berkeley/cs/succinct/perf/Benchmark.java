@@ -100,6 +100,9 @@ public class Benchmark {
                 } else if(benchParams[0].equals("SuccinctBuffer")) {
                     System.out.println("Benchmarking all methods for SuccinctBuffer...");
                     new SuccinctBufferBench(dataPath, storageMode).benchAll(resPath);
+                } else if(benchParams[0].equals("SuccinctBuffer-TFS")) {
+                    System.out.println("Benchmarking all methods for SuccinctBuffer... (from TFS)");
+                    new SuccinctBufferBench(tfsPath, dataPath).benchAll(resPath);
                 } else if(benchParams[0].equals("SuccinctFileBuffer")) {
                     System.out.println("Benchmarking all methods for SuccinctFileBuffer...");
                     new SuccinctFileBufferBench(dataPath, storageMode).benchAll(queryFile, resPath, threads, extrLen);
