@@ -136,7 +136,8 @@ public class SuccinctFileBufferBench {
 
         for (int i = 0; i < numThreads; i++) {
             int offset = i/numThreads * queries.length;
-            benchTasks[i] = new SearchBenchTask(queries, offset);
+            int lim = (i+1)/numThreads * queries.length;
+            benchTasks[i] = new SearchBenchTask(queries, offset, lim);
         }
 
         for (int i = 0; i < numThreads; i++) {
@@ -166,7 +167,8 @@ public class SuccinctFileBufferBench {
 
         for (int i = 0; i < numThreads; i++) {
             int offset = i/numThreads * randoms.length;
-            benchTasks[i] = new ExtractBenchTask(randoms, extrLen, offset);
+            int lim = (i+1)/numThreads * randoms.length;
+            benchTasks[i] = new ExtractBenchTask(randoms, extrLen, offset, lim);
         }
 
         for (int i = 0; i < numThreads; i++) {
@@ -205,11 +207,13 @@ public class SuccinctFileBufferBench {
         private int queriesExecuted;
         private String[] queries;
         private int startOffset;
+        private int endLimit;
 
-        public SearchBenchTask(String[] queries, int offset) {
+        public SearchBenchTask(String[] queries, int offset, int lim) {
             queriesExecuted = 0;
             this.queries = queries;
             startOffset = offset;
+            endLimit = lim;
         }
 
         @Override
@@ -220,17 +224,26 @@ public class SuccinctFileBufferBench {
 
             while(System.currentTimeMillis() < until) {
                 buffer.search(queries[i++].getBytes());
+                if (i == endLimit) {
+                    i = startOffset;
+                }
             }
 
             until = System.currentTimeMillis() + MEASUREMENT_TIME*1000L;
             while(System.currentTimeMillis() < until) {
                 buffer.search(queries[i++].getBytes());
                 queriesExecuted++;
+                if (i == endLimit) {
+                    i = startOffset;
+                }
             }
 
             until = System.currentTimeMillis() + COOLDOWN_TIME*1000L;
             while(System.currentTimeMillis() < until) {
                 buffer.search(queries[i++].getBytes());
+                if (i == endLimit) {
+                    i = startOffset;
+                }
             }
 
             return queriesExecuted;
@@ -239,14 +252,15 @@ public class SuccinctFileBufferBench {
 
     private class ExtractBenchTask implements Callable<Integer> {
 
-        private int queriesExecuted, startOffset, extrLen;
+        private int queriesExecuted, startOffset, endLimit, extrLen;
         private long[] randoms;
 
-        public ExtractBenchTask(long[] randoms, int extrLen, int offset) {
+        public ExtractBenchTask(long[] randoms, int extrLen, int offset, int lim) {
             queriesExecuted = 0;
             this.randoms = randoms;
             this.extrLen = extrLen;
             startOffset = offset;
+            endLimit = lim;
         }
 
         @Override
@@ -257,17 +271,26 @@ public class SuccinctFileBufferBench {
 
             while(System.currentTimeMillis() < until) {
                 buffer.extract(randoms[i++], extrLen);
+                if (i == endLimit) {
+                    i = startOffset;
+                }
             }
 
             until = System.currentTimeMillis() + MEASUREMENT_TIME*1000L;
             while(System.currentTimeMillis() < until) {
                 buffer.extract(randoms[i++], extrLen);
                 queriesExecuted++;
+                if (i == endLimit) {
+                    i = startOffset;
+                }
             }
 
             until = System.currentTimeMillis() + COOLDOWN_TIME*1000L;
             while(System.currentTimeMillis() < until) {
                 buffer.extract(randoms[i++], extrLen);
+                if (i == endLimit) {
+                    i = startOffset;
+                }
             }
 
             return queriesExecuted;
