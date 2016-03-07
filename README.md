@@ -41,15 +41,19 @@ To run the benchmark, use the `succinct-perf` script provided in the `bin/` dire
 It's usage is as follows:
 
 ```
-usage: succinct-perf
- -b <arg>   The benchmark to run; the specification format is
-            <class-name>.<method-name>. If only class name is specified,
-            then all benchmarks for that class name will be run. To run
-            all benchmarks for all classes, specify "all"
- -d <arg>   Path to serialized Succinct data. (REQUIRED)
- -q <arg>   Path to query file that contains query strings (Required for
-            search/count benchmarks).
- -r <arg>   Path where the results will be stored.
- -s <arg>   Storage mode for SuccinctBuffer benchmarks. Can be MEMORY_ONLY
-            or MEMORY_MAPPED.
+usage: succinct-pref
+  -b <arg>   The benchmark to run; the specification format is
+			 <class-name>.<method-name>. If only class name is specified,
+			 then all benchmarks for that class name will be run. To run
+			 all benchmarks for all classes, specify "all"
+  -d <arg>   Path to serialized Succinct data. (REQUIRED)
+  -e <arg>   Length of extract queries
+  -n <arg>   Number of threads for throughput bench (on
+			 SuccinctFileBuffer[-TFS])
+  -q <arg>   Path to query file that contains query strings (Required for
+			 search/count benchmarks).
+  -r <arg>   Path where the results will be stored 
+  -s <arg>   Storage mode for SuccinctBuffer benchmarks. Can be MEMORY_ONLY
+			 or MEMORY_MAPPED.
+  -t <arg>   Tachyon master path (REQUIRED if file on TFS)
 ```

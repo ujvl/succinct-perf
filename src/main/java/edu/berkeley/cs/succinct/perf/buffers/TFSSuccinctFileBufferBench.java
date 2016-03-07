@@ -49,7 +49,7 @@ public class TFSSuccinctFileBufferBench extends SuccinctFileBufferBench {
             System.out.println("Reading tachyon file ByteBuffer...");
             ByteBuffer byteBuffer = TachyonUtil.readByteBuf(tfs, file, readOptions);
 
-            //setFileBuffer(new SuccinctFileBuffer(byteBuffer));
+//            setFileBuffer(new SuccinctFileBuffer(byteBuffer));
             System.out.println("Done loading SuccinctFileBuffer!");
 
         } catch (TachyonException|IOException e) {
